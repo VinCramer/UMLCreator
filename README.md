@@ -22,5 +22,7 @@ Despite still having the functional original version of this project, this repos
 This is the new layout, with icons provided by feather.netlify (https://feather.netlify.com/):
 ![umlcreator gui v1](https://user-images.githubusercontent.com/32882792/38576255-a18dbb96-3ccb-11e8-953d-7abd9564aa61.PNG)
 
-This is an an example of a how a parent-child relationship, variables, methods, and an API would be represented in my older version of this proejct:
+This is an an example of a how a parent-child relationship, variables, methods, and an API would be represented in my older version of this project:
+
+
 ![219 example](https://user-images.githubusercontent.com/32882792/38476046-cb22ff1e-3b79-11e8-8712-0ac6f8973f66.PNG)
