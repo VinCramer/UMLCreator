@@ -23,6 +23,7 @@ public class UMLCreator extends AppTemplate{
         Locale.setDefault(Locale.US);
         
         launch(args);
+        
     }
 
     @Override

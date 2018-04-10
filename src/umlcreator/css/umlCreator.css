@@ -2,6 +2,58 @@
 /* 
     
     Author: Vincent Cramer
-    Purpose: Provide styling for various parts of umkCreator
+    Purpose: Provide styling for various parts of umlCreator
 */
 
+.hBox{
+
+    -fx-background-color:#F0F8FF;
+}
+
+.label{
+    -fx-font-size:20px;
+    -fx-font-weight:bold;
+    
+}
+
+.design_renderer{
+    -fx-background-color:#FFFFCC;
+}
+
+.component_toolbar{
+    -fx-background-color:#FFCCCC;
+}
+
+.table_label{
+    -fx-font-size:25px;
+    -fx-font-weight:bold;
+}
+
+.rect_vbox{
+    -fx-border-color:black;
+    -fx-border-width:1px;
+}
+
+.uml_label{
+    -fx-font-size:10px;
+    -fx-font-weight:normal;
+}
+
+.api_stack_pane{
+    -fx-border-color:black;
+    -fx-border-width:2px;
+}
+
+.grid_cell_on{
+    -fx-bakcground-color:#FFFFCC;
+    -fx-border-color:black;
+    -fx-border-width:5px;
+}
+
+.grid_cell_off{
+    -fx-background-color:#FFFFCC;
+    
+    -fx-border-width:5px;
+    
+    -fx-border-color:#FFFFCC;
+}

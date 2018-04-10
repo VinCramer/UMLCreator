@@ -1,8 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package umlcreator.data;
 
 import saf.AppTemplate;
@@ -14,10 +10,19 @@ import saf.components.AppDataComponent;
  */
 public class DataManager implements AppDataComponent{
 
+    /**
+     * Creates the DataManger, which allows the user to manipulate the Workspace
+     * 
+     * @param initApp 
+     * The AppTemplate that is created with the launching of the project
+     */
     public DataManager(AppTemplate initApp){
         
     }
     
+    /**
+     * Clears all information about the currently selected items and UML diagram
+     */
     @Override
     public void reset() {
 

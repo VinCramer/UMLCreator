@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    This XML file allows us to easily customize the look and language used
+    in our program's user interface. Note that this properties file is only
+    for the standard controls for an app from the SimpleAppFramework, so
+    it would not include things initialized for the workspace, which is
+    customizable.
+-->
+<properties>
+    <property_list>
+        <property name="APP_TITLE"	    value="UMLCreator"></property>
+	<property name="APP_LOGO"	    value="logo.png"></property>
+	<property name="APP_PATH_CSS"	    value="css/"></property>
+	<property name="APP_CSS"	    value="umlCreator.css"></property>
+        
+        <!-- PROGRAM ICON FILES -->
+        <property name="NEW_ICON"	    value="new.png"></property>
+        <property name="LOAD_ICON"	    value="load.png"></property>
+        <property name="SAVE_ICON"	    value="save.png"></property>
+        <property name="EXIT_ICON"          value="exit.png"></property> 
+        
+		
+		<property name="SAVE_AS_ICON"	    value="saveAs.png"></property>
+        <property name="EXPORT_CODE_ICON"	    value="code.png"></property>
+        <property name="EXPORT_PHOTO_ICON"	    value="camera.png"></property>
+		
+		
+        <property name="SELECT_ICON"          value="select.png"></property>
+		<property name="RESIZE_ICON"	    value="resize.png"></property>
+        <property name="ADD_INTERFACE_ICON"	    value="addInterface.png"></property>
+        <property name="ADD_CLASS_ICON"	    value="addClass.png"></property>
+        <property name="REMOVE_ICON"          value="deleteClass.png"></property>
+		
+		
+		<property name="UNDO_ICON"	    value="undo.png"></property>
+        <property name="REDO_ICON"	    value="redo.png"></property>
+		
+		
+        <property name="ZOOM_IN_ICON"	    value="zoomIn.png"></property>
+		<property name="ZOOM_OUT_ICON"	    value="zoomOut.png"></property>
+        
+		
+        <!-- TOOLTIPS FOR BUTTONS -->
+        <property name="NEW_TOOLTIP"		value="Create a New UML"></property>
+        <property name="LOAD_TOOLTIP"		value="Load an Existing UML"></property>
+        <property name="SAVE_TOOLTIP"		value="Save this UML"></property>
+        <property name="EXIT_TOOLTIP"		value="Exit the Application"></property>
+		
+		<property name="SELECT_TOOLTIP"		value="Select a component"></property>
+        <property name="SAVE_AS_TOOLTIP"		value="Save this UML as a certain file"></property>
+        <property name="UNDO_TOOLTIP"		value="Undo"></property>
+        <property name="REDO_TOOLTIP"		value="Redo"></property>
+		
+		<property name="EXPORT_CODE_TOOLTIP"		value="Export the UML diagrams here to Java code"></property>
+        <property name="EXPORT_PHOTO_TOOLTIP"		value="Export the UML diagrams here to a picture"></property>
+        <property name="RESIZE_TOOLTIP"		value="Resize a component"></property>
+        <property name="ADD_INTERFACE_TOOLTIP"		value="Add an interface"></property>
+		
+		<property name="ADD_CLASS_TOOLTIP"		value="Add a class"></property>
+        <property name="REMOVE_TOOLTIP"		value="Remove a class or interface"></property>
+        <property name="ZOOM_IN_TOOLTIP"		value="Zoom in"></property>
+        <property name="ZOOM_OUT_TOOLTIP"		value="Zoom out"></property>
+        
+        <!-- ERROR MESSAGES -->
+        <property name="CLOSE_BUTTON_TEXT"              value="Close"></property>
+
+        <property name="NEW_ERROR_MESSAGE"              value="An error occured creating New work."></property>
+        <property name="NEW_ERROR_TITLE"		value="New Work Error"></property>
+        <property name="LOAD_ERROR_MESSAGE"             value="An error occured loading work."></property>
+        <property name="LOAD_ERROR_TITLE"		value="Load Work Error"></property>
+        <property name="SAVE_ERROR_MESSAGE"             value="An error occured saving work."></property>
+        <property name="SAVE_ERROR_TITLE"		value="Save Work Error"></property>
+        <property name="PROPERTIES_LOAD_ERROR_MESSAGE"	value="An error occured loading a properties file."></property>	
+        <property name="PROPERTIES_LOAD_ERROR_TITLE"	value="Properties File Loading Error"></property>
+	
+        <!-- VERIFICATION MESSAGES -->
+	
+        <property name="NEW_COMPLETED_MESSAGE"		value="New Work Ready for Editing"></property>
+        <property name="NEW_COMPLETED_TITLE"		value="New Work Created"></property>
+        <property name="LOAD_COMPLETED_MESSAGE"		value="File Loading Completed and ready for editing"></property>
+        <property name="LOAD_COMPLETED_TITLE"		value="Loading Completed"></property>
+        <property name="SAVE_COMPLETED_MESSAGE"		value="File Saving Completed"></property>
+        <property name="SAVE_COMPLETED_TITLE"		value="Saving Completed"></property>
+        <property name="SAVE_UNSAVED_WORK_MESSAGE"	value="Would you like to save your unsaved work first?"></property>
+        <property name="SAVE_UNSAVED_WORK_TITLE"	value="Save unsaved work?"></property>
+	
+        <property name="NEW_CREATED_MESSAGE"		value="New Work Created but not yet Saved"></property>
+        <property name="WORK_LOADED_MESSAGE"		value="The Work has been Loaded"></property>
+        <property name="WORK_SAVED_MESSAGE"		value="The Work has been Saved"></property>
+        <property name="SAVE_UNSAVED_WORK_MESSAGE"	value="Do you want to save your unsaved work first?"></property>
+	<property name="SAVE_WORK_TITLE"		value="Save your work"></property>
+	<property name="LOAD_WORK_TITLE"		value="Select work file to load"></property>
+	<property name="WORK_FILE_EXT"			value="UMLCreator"></property>
+	<property name="WORK_FILE_EXT_DESC"		value="UMLCreator Files"></property>
+    </property_list>
+    <property_options_list>
+    </property_options_list>
+</properties>

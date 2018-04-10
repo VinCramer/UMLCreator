@@ -81,7 +81,6 @@ public abstract class AppTemplate extends Application {
 	    // AND THE CUSTOM UI STUFF FOR THE WORKSPACE
 	    boolean success = loadProperties(SIMPLE_APP_PROPERTIES_FILE_NAME)
 		    && loadProperties(WORKSPACE_PROPERTIES_FILE_NAME);
-	    
 	    if (success) {
 		String appTitle = props.getProperty(APP_TITLE);
                 
