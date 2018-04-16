@@ -70,11 +70,9 @@ public class Method {
         
         s+="(";
         
-        if(argument.isEmpty()){
-            //do nothing
-        }
         
-        else{
+        
+        if(!argument.isEmpty()){
             for(int i=0;i<argument.size();i++){
                 s+=ARGUMENT_PREFIX + (i+1) + ": " + argument.get(i) + ", ";
             }

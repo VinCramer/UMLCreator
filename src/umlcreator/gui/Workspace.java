@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import javafx.geometry.Insets;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
@@ -20,6 +21,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.RowConstraints;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Scale;
@@ -76,6 +78,8 @@ public class Workspace extends AppWorkspaceComponent{
     ArrayList<Rectangle> rectangles;
     
     TableView variableTable, methodTable;
+    
+    CheckBox gridCheckBox, snapCheckBox;
     
     TableColumn firstVC, secondVC, thirdVC, fourthVC, fifthVC, 
             firstMC, secondMC, thirdMC, fourthMC, fifthMC;
@@ -205,15 +209,67 @@ public class Workspace extends AppWorkspaceComponent{
        screen
      *   
      * @param ag 
+     * Used for accessing buttons and checboxes
      * 
      */
     private void setUpHandlers(AppGUI ag) {
   
-        //will add in this functionality with other buttons later
-/*        exportPhotoButton.setOnAction(e->{
+        initializeButtonsAndCheckBoxes(ag);
+
+        addTopRowActions();
+        addRightSideActions();
+        
+        
+        
+    }
+    
+    private void addTopRowActions(){
+        
+        exportPhotoButton.setOnAction(e->{
             editController.processSnapshot();
         });
-*/
+        
+        zoomInButton.setOnAction(e->{
+            if(scale.getX()<2){
+                scale.setX(scale.getX()*1.1);
+                scale.setY(scale.getY()*1.1);
+                
+                //TODO - change scale of everything in view!
+            }
+        });
+        
+        zoomOutButton.setOnAction(e->{
+            if(scale.getX()>0.5){
+                scale.setX(scale.getX()*(1/1.10));
+                scale.setY(scale.getY()*(1/1.10));
+                
+                //TODO - change scale of everything in view!
+            }
+        });
+        
+        //TODO - find API to add undo support
+        undoButton.setOnAction(e->{
+            
+        });
+        
+        //TODO - find API to add redo support
+        redoButton.setOnAction(e->{
+            
+        });
+
+        //toggle snap functionality - will add function later
+        snapCheckBox.setOnAction((event) -> {
+            boolean selected = snapCheckBox.isSelected();
+            snap=selected;
+        });
+        
+    }
+    
+    private void addRightSideActions(){
+        
+        addClassButton.setOnAction(e->{
+            dataManager.addNewClass();
+        });   
     }
 
     
@@ -548,6 +604,74 @@ public class Workspace extends AppWorkspaceComponent{
         designRendererScrollPane.setVbarPolicy(AS_NEEDED);
     }
 
+    /**
+     * Helper method for initializing buttons and checboxes along the top of the
+     * screen
+     * 
+     * @param ag 
+     * Used for accessing buttons and checboxes
+     */
+    private void initializeButtonsAndCheckBoxes(AppGUI ag) {
+        
+        //list to store buttons
+        ArrayList buttons = ag.getButtons();
+        
+        //initializing each button field
+        zoomInButton = (Button)buttons.get(0);
+        zoomOutButton = (Button)buttons.get(1);
+        exportPhotoButton = (Button)buttons.get(2);
+        exportCodeButton = (Button)buttons.get(3);
+        resizeButton = (Button)buttons.get(4);
+        selectButton = (Button)buttons.get(5);
+        addClassButton = (Button)buttons.get(6);
+        addInterfaceButton = (Button)buttons.get(7);
+        undoButton = (Button)buttons.get(8);
+        redoButton = (Button)buttons.get(9);
+        removeButton = (Button)buttons.get(10);
+        
+        //same thing, but now with checkboxes
+        ArrayList<CheckBox> checkBoxes = ag.getCheckBoxes();
+        gridCheckBox = checkBoxes.get(0);
+        snapCheckBox = checkBoxes.get(1); 
+    }
+
+    public TextField getClassTextField(){
+        return classTextField;
+    }
     
+    public void setClassTextField(String s){
+        classTextField.setText(s);
+    }
+    
+    public void setPackageTextField(String s){
+        packageTextField.setText(s);
+    }
+    
+    public void setParentComboBox(String s){
+        parentComboBox.setValue(s);
+    }
+    
+    /**
+     * Adds a newly created pane to the user's view
+     * 
+     * @param newPane 
+     * Pane that will be added
+     */
+    public void addPaneToWorkspace(StackPane newPane){
+        
+        //change "zoom" of new pane if user is zoomed in or out
+        newPane.setScaleX(scale.getX());
+        newPane.setScaleY(scale.getY());
+        
+        workspace.getChildren().add(newPane);
+        
+        
+        dataManager.setSelectedPane(newPane);
+                
+        //magic numbers - from the positioning given in previous parts, such as 
+        //DraggableClass constructor
+        newPane.setLayoutX(100);
+        newPane.setLayoutY(100);
+    }
     
 }

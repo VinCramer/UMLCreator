@@ -32,6 +32,7 @@
 .rect_vbox{
     -fx-border-color:black;
     -fx-border-width:1px;
+    -fx-background-color:white;
 }
 
 .uml_label{
