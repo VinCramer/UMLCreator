@@ -3,7 +3,7 @@ A JavaFX application based on the SBU CSE 219 course project using the given lib
 
 Despite still having the functional original version of this project, this repository is a remastering of the production to bring the code quality up to my current standards. 
 
-#Program functions to include:
+# Program functions to include:
 - Saving to JSON
 - Loading from JSON
 - Exporting UML diagram to compiling Java code
