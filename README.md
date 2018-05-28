@@ -6,6 +6,7 @@ Despite still having the functional original version of this project, this repos
 # Program functions:
 - Launching a new project
 - Adding new classes
+- Moving classes
 - Taking screenshots of UML diagram
 
 # Program functions to include:
@@ -18,7 +19,6 @@ Despite still having the functional original version of this project, this repos
 - Resizing classes and interfaces
 - Adding a grid to the background
 - Ability to snap to aforementioned grid
-- Moving classes and interfaces
 - Adding and editing variables and methods such as the visibility and if they are static
 - Zooming in and out
 
