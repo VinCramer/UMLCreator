@@ -149,6 +149,7 @@ public class DataManager implements AppDataComponent{
      */
     public void unhighlightPane() {
 	selectedPane.setEffect(null);
+        selectedPane.getChildren().get(0).setEffect(null);
     }
     
     /**
@@ -158,6 +159,10 @@ public class DataManager implements AppDataComponent{
      * The newly created class that will be added to the workspace
      */
     public void initNewClass(StackPane newClass){
+        
+        if(selectedPane!=null){
+            unhighlightPane();
+        }
         
         Workspace workspace = (Workspace)app.getWorkspaceComponent();
 	
@@ -274,12 +279,16 @@ public class DataManager implements AppDataComponent{
     public StackPane getTopPane(double x, double y){
         StackPane topPane = findTopPane(x,y);
         
+        if(topPane == null){
+            return null;
+        }
+        
         //already selected
         if(topPane.equals(selectedPane)){
             return topPane;
         }
         
-        if(selectedPane!=null && topPane!=null){
+        if(selectedPane!=null){
             unhighlightPane();
         }
         
