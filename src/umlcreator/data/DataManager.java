@@ -111,7 +111,7 @@ public class DataManager implements AppDataComponent{
                 newClass.getMethodBox(),newClass.getVarBox());
         
         //want the UMLs as stackPanes so they can overlap
-        stackPane.getChildren().addAll(newClass.getHolderBox());
+        stackPane.getChildren().addAll(newClass,newClass.getHolderBox());
         
         initNewClass(stackPane);
         setSelectedPane(stackPane);
@@ -173,6 +173,124 @@ public class DataManager implements AppDataComponent{
         workspace.addPaneToWorkspace(newClass);
         
         
+    }
+    
+    /**
+     * Updates the state of the program
+     * 
+     * @param newState 
+     * The new state of the program
+     */
+    public void setState(UMLCreatorState newState){
+        state=newState;
+    }
+    
+    /**
+     * Boolean expression to see if the current state is the same state as the 
+     * argument
+     * 
+     * @param testState
+     * The state value that is compared to the actual current state
+     * 
+     * @return 
+     * True if the argument state is the same as the current application, false 
+     * otherwise
+     */
+    public boolean isInState(UMLCreatorState testState) {
+	return state == testState;
+    }
+    
+    /**
+     * Accessor for selected pane
+     * 
+     * @return 
+     * Pane that is currently being selected
+     */
+    public StackPane getSelectedPane(){
+        return selectedPane;
+    }
+    
+    /**
+     * Returns the StackPane from the user's workspace that is "on top", or in 
+     * front of the other ones if there are some that overlap where the user 
+     * clicks.
+     * 
+     * @param x
+     * x coordinate of where user clicked
+     * 
+     * @param y
+     * y coordinate of where user clicked
+     * 
+     * @return 
+     * The top most StackPane where the user clicked if there's 1 or more there,
+     * or null if the user clicked somewhere without any Stack Panes.
+     */
+    public StackPane findTopPane(double x, double y){
+        
+        Workspace workspace = (Workspace)app.getWorkspaceComponent();
+        ArrayList<StackPane> panes = workspace.getUserMadePanes();
+        
+        int i;
+        double width,height;
+        double rightEdge,leftEdge,topEdge,bottomEdge;
+        StackPane tempPane;
+        
+        //we loop in reverse order because it's more likely for the user's newer
+        //nodes to cover the older ones
+        for(i=panes.size()-1;i>=0;i--){
+            tempPane = panes.get(i);
+            
+            //we can use the pre defined getWidth and getHeight methods from our
+            //DraggableClasses/DraggableInterfaces
+            width = ((Draggable)(tempPane.getChildren().get(0))).getWidth();
+            height = ((Draggable)(tempPane.getChildren().get(0))).getHeight();
+            
+            rightEdge = tempPane.getLayoutX()+width;
+            leftEdge = tempPane.getLayoutX();
+            bottomEdge = tempPane.getLayoutY()+height;
+            topEdge = tempPane.getLayoutY();
+            
+            //if coordinates are within the edges of this node, that's our top
+            if((x>leftEdge && x<rightEdge)&&(y<bottomEdge&&y>topEdge)){
+                return tempPane;
+            }
+        }
+        return null;
+    }
+    
+    /**
+     * Accesses the top pane from where the user clicked, if there is a pane 
+     * there, and selects it
+     * 
+     * @param x
+     * x coordinate of where user clicked
+     * 
+     * @param y 
+     * y coordinate of where user clicked
+     * 
+     * @return
+     * The top most pane where the user clicked, or null
+     */
+    public StackPane getTopPane(double x, double y){
+        StackPane topPane = findTopPane(x,y);
+        
+        //already selected
+        if(topPane.equals(selectedPane)){
+            return topPane;
+        }
+        
+        if(selectedPane!=null && topPane!=null){
+            unhighlightPane();
+        }
+        
+        if(topPane!=null){
+            highlightPane(topPane);
+            selectedPane = topPane;
+            ((Draggable)(topPane.getChildren().get(0))).start((int)x,(int)y);
+            return selectedPane;
+        }
+        
+        return null;
     }
     
 }

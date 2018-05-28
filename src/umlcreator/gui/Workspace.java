@@ -68,6 +68,8 @@ public class Workspace extends AppWorkspaceComponent{
     
     ScrollPane designRendererScrollPane, methodScrollPane, varScrollPane;
 
+    ArrayList<StackPane> userMadePanes;
+    
     boolean snap;
     
     Button exportPhotoButton, zoomInButton, zoomOutButton, exportCodeButton, 
@@ -103,6 +105,9 @@ public class Workspace extends AppWorkspaceComponent{
         screenHeight = bounds.getHeight();
         screenWidth = bounds.getWidth();
         
+        userMadePanes = new ArrayList();
+        
+        //dialogue box in case there's an error
         PropertiesManager propsSingleton = PropertiesManager.
                 getPropertiesManager();
 
@@ -218,11 +223,33 @@ public class Workspace extends AppWorkspaceComponent{
 
         addTopRowActions();
         addRightSideActions();
-        
+        addWorkspaceActions();
         
         
     }
     
+    /**
+     * Adds listeners to user's work area, such as mouse presses and drags
+     */
+    private void addWorkspaceActions(){
+        
+        
+        workspace.setOnMousePressed(e->{
+            editController.processMousePressed(e.getX(),e.getY());
+        });
+        
+        workspace.setOnMouseDragged(e->{
+            editController.processMouseDragged(e.getX(),e.getY());
+        });
+        
+        workspace.setOnMouseReleased(e->{
+            editController.processMouseReleased(e.getX(),e.getY());
+        });
+    }
+    
+    /**
+     * Adds listeners to the top row of buttons on screen
+     */
     private void addTopRowActions(){
         
         exportPhotoButton.setOnAction(e->{
@@ -263,8 +290,16 @@ public class Workspace extends AppWorkspaceComponent{
             snap=selected;
         });
         
+        
+        selectButton.setOnAction(e->{
+            editController.processSelectionTool();
+        });
+        
     }
     
+    /**
+     * Adds listeners to editing section of the screen on the right hand side
+     */
     private void addRightSideActions(){
         
         addClassButton.setOnAction(e->{
@@ -663,15 +698,64 @@ public class Workspace extends AppWorkspaceComponent{
         newPane.setScaleX(scale.getX());
         newPane.setScaleY(scale.getY());
         
+        //make pane visible to user
         workspace.getChildren().add(newPane);
         
+        //store panes in list to make for easy removal later
+        userMadePanes.add(newPane);
         
+        //put focus on newest pane
         dataManager.setSelectedPane(newPane);
                 
         //magic numbers - from the positioning given in previous parts, such as 
         //DraggableClass constructor
         newPane.setLayoutX(100);
-        newPane.setLayoutY(100);
+        newPane.setLayoutY(300);
+    }
+    
+    /**
+     * Updates the method and variables parts of the program to display those 
+     * values for the currently selected node, and allow user to update them 
+     * and see their changes in real time.
+     * 
+     * @param sp 
+     * The StackPane that contains the UML class or interface
+     */
+    public void updateComponentToolbar(StackPane sp){
+        //TODO - finish this method
+    }
+    
+    /**
+     * Accessor for the panes that were created by the user
+     * 
+     * @return 
+     * An ArrayList of StackPanes which were created by the user
+     */
+    public ArrayList<StackPane> getUserMadePanes(){
+        return userMadePanes;
+    }
+    
+    /**
+     * Function that moves the position of a pane inside the workspace
+     * 
+     * @param sp
+     * Pane that will be moved
+     * 
+     * @param x
+     * x coordinate of new position of pane
+     * 
+     * @param y 
+     * y coordinate of new position of pane
+     */
+    public void move(StackPane sp, double x, double y){
+        
+        if(!snap){
+            sp.setLayoutX(x);
+            sp.setLayoutY(y);
+        }
+        else{
+            //TODO - snap functionality
+        }
     }
     
 }
