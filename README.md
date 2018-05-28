@@ -3,20 +3,27 @@ A JavaFX application based on the SBU CSE 219 course project using the given lib
 
 Despite still having the functional original version of this project, this repository is a remastering of the production to bring the code quality up to my current standards. 
 
-#Program functions to include:
-- Saving to JSON
-- Loading from JSON
+# Program functions:
+- Launching a new project
+- Adding new classes
+- Taking screenshots of UML diagram
+
+# Program functions to include:
+- Saving to a JSON file
+- Loading from a JSON file
 - Exporting UML diagram to compiling Java code
-- Adding classes and interfaces
+- Adding interfaces
 - Removing classes and interfaces
 - Displaying inheritance
 - Resizing classes and interfaces
-- Taking screenshots of UML diagram
 - Adding a grid to the background
 - Ability to snap to aforementioned grid
 - Moving classes and interfaces
 - Adding and editing variables and methods such as the visibility and if they are static
 - Zooming in and out
+
+
+
 
 
 This is the new layout, with icons provided by feather.netlify (https://feather.netlify.com/):
