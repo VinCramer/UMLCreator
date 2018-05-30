@@ -284,10 +284,14 @@ public class Workspace extends AppWorkspaceComponent{
             
         });
 
-        //toggle snap functionality - will add function later
-        snapCheckBox.setOnAction((event) -> {
+        snapCheckBox.setOnAction((e) -> {
             boolean selected = snapCheckBox.isSelected();
             snap=selected;
+        });
+        
+        gridCheckBox.setOnAction(e->{
+            boolean selected = gridCheckBox.isSelected();
+            renderGrid(selected);
         });
         
         
@@ -754,8 +758,116 @@ public class Workspace extends AppWorkspaceComponent{
             sp.setLayoutY(y);
         }
         else{
-            //TODO - snap functionality
+            //even when snap is toggled, don't want to constantly snap - want 
+            //some freedom to move. This checks to see if the pane is within a 
+            //certain distance of a gridline, and if so, it will snap to it, 
+            //otherwise it will not snap.
+            if(x%cellWidth<=(cellWidth/5.0)){ 
+               snapX(sp,x);
+            }
+            else{
+                sp.setLayoutX(x);    
+            }
+            
+            //same story with the y position
+            if(y%cellHeight<=(cellHeight/5.0)){
+                snapY(sp,y);
+            }
+            else{
+                sp.setLayoutY(y);
+            }
+            
+        }
+    }
+
+
+    /**
+     * Snaps the given pane to the closest fifth of the screen in terms of width
+     * (on x-axis)
+     * 
+     * @param s
+     * The pane that will be snapped
+     * 
+     * @param x 
+     * Current position of the pane
+     */
+    private void snapX(StackPane s, double x){
+        //5 x-positions to snap to: 0, cellWidth, (2*cellWidth), (3*cellWidth), 
+        //(4*cellWidth)
+        
+        if(x>=4*cellWidth){
+            s.setLayoutX(4*cellWidth);
+        }
+        else if(x>=3*cellWidth){
+            s.setLayoutX(3*cellWidth);
+        }
+        else if(x>=2*cellWidth){
+            s.setLayoutX(2*cellWidth);
+        }
+        else if(x>=cellWidth){
+            s.setLayoutX(cellWidth);
+        }
+        else{
+            s.setLayoutX(0);
         }
     }
     
+    /**
+     * Snaps the given pane to the closest fifth of the screen in terms of 
+     * height (on y-axis)
+     * 
+     * @param s
+     * The pane that will be snapped
+     * 
+     * @param y 
+     * Current position of the pane
+     */
+    private void snapY(StackPane s, double y){
+        //5 y-positions to snap to: 0, cellHeight, (2*cellHeight), 
+        //(3*cellHeight), (4*cellHeight)
+        
+        if(y>=4*cellHeight){
+            s.setLayoutY(4*cellHeight);
+        }
+        else if(y>=3*cellHeight){
+            s.setLayoutY(3*cellHeight);
+        }
+        else if(y>=2*cellHeight){
+            s.setLayoutY(2*cellHeight);
+        }
+        else if(y>=cellHeight){
+            s.setLayoutY(cellHeight);
+        }
+        else{
+           s.setLayoutY(0); 
+        }
+    }
+    
+    /**
+     * Toggles the display of the grid to the user
+     * 
+     * @param render 
+     * Boolean which determines if the grid will be displayed (true) or not 
+     * (false)
+     */
+    private void renderGrid(boolean render){
+       //secret is that rectanges are always there - just add a styling to their
+       //border when necessary
+        
+        
+        if(render){
+            for(int r=0;r<25;r++){
+                //below should work with eventual zoom implementation
+                rectangles.get(r).setStroke(Color.BLACK);
+                rectangles.get(r).setStrokeWidth(2*scale.getX());
+            }
+        }
+        
+        else{
+            for(int r=0;r<25;r++){
+                rectangles.get(r).setStroke(Color.web("#FFFFCC"));
+                rectangles.get(r).setStrokeWidth(0);
+            }
+        }
+    }
 }

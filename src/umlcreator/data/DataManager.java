@@ -62,7 +62,7 @@ public class DataManager implements AppDataComponent{
 	dropShadowEffect.setSpread(1.0);
 	dropShadowEffect.setColor(Color.YELLOW);
 	dropShadowEffect.setBlurType(BlurType.GAUSSIAN);
-	dropShadowEffect.setRadius(15);
+	dropShadowEffect.setRadius(5);
 	highlightedEffect = dropShadowEffect;
         
         panes = new ArrayList();
