@@ -108,7 +108,7 @@ public class DataManager implements AppDataComponent{
         
         //place all of the parts into an HBox to display in top-down order
         newClass.getHolderBox().getChildren().addAll(newClass.getNameBox(),
-                newClass.getMethodBox(),newClass.getVarBox());
+                newClass.getVarBox(),newClass.getMethodBox());
         
         //want the UMLs as stackPanes so they can overlap
         stackPane.getChildren().addAll(newClass,newClass.getHolderBox());

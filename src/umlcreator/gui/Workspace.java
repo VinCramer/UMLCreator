@@ -14,6 +14,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
+import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.ColumnConstraints;
@@ -22,6 +23,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Scale;
@@ -32,6 +34,7 @@ import saf.components.AppWorkspaceComponent;
 import saf.ui.AppGUI;
 import umlcreator.controller.EditController;
 import umlcreator.data.DataManager;
+import umlcreator.data.UMLCreatorState;
 import umlcreator.file.FileManager;
 
 /**
@@ -51,7 +54,7 @@ public class Workspace extends AppWorkspaceComponent{
     ColumnConstraints columnConstraints;
     
     TextField classTextField, packageTextField;
-    
+        
     ComboBox parentComboBox;
     
     GridPane designRenderer, componentToolbar;
@@ -297,6 +300,13 @@ public class Workspace extends AppWorkspaceComponent{
         
         selectButton.setOnAction(e->{
             editController.processSelectionTool();
+        });
+        
+        removeButton.setOnAction(e->{
+            //if we've selected a pane, remove that pane. Otherwise, do nothing.
+            if(dataManager.isInState(UMLCreatorState.SELECTING_PANE)){
+                workspace.getChildren().remove(dataManager.getSelectedPane());
+            }
         });
         
     }
@@ -726,7 +736,31 @@ public class Workspace extends AppWorkspaceComponent{
      * The StackPane that contains the UML class or interface
      */
     public void updateComponentToolbar(StackPane sp){
-        //TODO - finish this method
+        
+        VBox holder = (VBox)sp.getChildren().get(1);
+        VBox variableBox = (VBox)holder.getChildren().get(1);
+        VBox methodBox = (VBox)holder.getChildren().get(2);
+        
+        variableTable.setEditable(true);
+        methodTable.setEditable(true);
+        
+        firstVC.setEditable(true);
+        secondVC.setEditable(true);
+        thirdVC.setEditable(true);
+        fourthVC.setEditable(true);
+        fifthVC.setEditable(true);
+        
+        firstMC.setEditable(true);
+        secondMC.setEditable(true);
+        thirdMC.setEditable(true);
+        fourthMC.setEditable(true);
+        fifthMC.setEditable(true);
+        
+        //these are easy compared to the others
+        fifthVC.setCellFactory(CheckBoxTableCell.forTableColumn(fifthVC));
+        thirdVC.setCellFactory(CheckBoxTableCell.forTableColumn(thirdVC));
+        
+        //TODO - need to finish this method!
     }
     
     /**
@@ -856,7 +890,7 @@ public class Workspace extends AppWorkspaceComponent{
         
         
         if(render){
-            for(int r=0;r<25;r++){
+            for(int r=0;r<rectangles.size();r++){
                 //below should work with eventual zoom implementation
                 rectangles.get(r).setStroke(Color.BLACK);
                 rectangles.get(r).setStrokeWidth(2*scale.getX());
@@ -864,7 +898,7 @@ public class Workspace extends AppWorkspaceComponent{
         }
         
         else{
-            for(int r=0;r<25;r++){
+            for(int r=0;r<rectangles.size();r++){
                 rectangles.get(r).setStroke(Color.web("#FFFFCC"));
                 rectangles.get(r).setStrokeWidth(0);
             }
