@@ -7,6 +7,8 @@ Despite still having the functional original version of this project, this repos
 - Launching a new project
 - Adding new classes
 - Moving classes
+- Toggleable grid in the background
+- Ability to snap to aforementioned grid, even if the grid is not displayed
 - Taking screenshots of UML diagram
 
 # Program functions to include:
@@ -17,8 +19,6 @@ Despite still having the functional original version of this project, this repos
 - Removing classes and interfaces
 - Displaying inheritance
 - Resizing classes and interfaces
-- Adding a grid to the background
-- Ability to snap to aforementioned grid
 - Adding and editing variables and methods such as the visibility and if they are static
 - Zooming in and out
 
