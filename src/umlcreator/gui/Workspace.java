@@ -305,6 +305,7 @@ public class Workspace extends AppWorkspaceComponent{
         removeButton.setOnAction(e->{
             //if we've selected a pane, remove that pane. Otherwise, do nothing.
             if(dataManager.isInState(UMLCreatorState.SELECTING_PANE)){
+                userMadePanes.remove(dataManager.getSelectedPane());
                 workspace.getChildren().remove(dataManager.getSelectedPane());
             }
         });
