@@ -71,6 +71,27 @@ public class DraggableClass extends Rectangle implements Draggable{
 
     }
     
+    /**
+     * Adds a given variable to the list field of variables for future 
+     * references
+     * 
+     * @param v
+     * Variable that will be added
+     */
+    public void addVar(Var v){
+        variableList.add(v);
+    }
+    
+    /**
+     * Adds a method to the list field to be referenced later
+     * 
+     * @param m 
+     * Method that will be added
+     */
+    public void addMethod(Method m){
+        methodList.add(m);
+    }
+    
     @Override
     public UMLCreatorState getStartingState() {
         return STARTING_CLASS;

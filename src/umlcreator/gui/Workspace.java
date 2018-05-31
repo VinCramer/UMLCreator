@@ -34,6 +34,8 @@ import saf.components.AppWorkspaceComponent;
 import saf.ui.AppGUI;
 import umlcreator.controller.EditController;
 import umlcreator.data.DataManager;
+import umlcreator.data.Draggable;
+import umlcreator.data.DraggableClass;
 import umlcreator.data.UMLCreatorState;
 import umlcreator.file.FileManager;
 
@@ -255,6 +257,11 @@ public class Workspace extends AppWorkspaceComponent{
      */
     private void addTopRowActions(){
         
+        addClassButton.setOnAction(e->{
+            dataManager.addNewClass();
+        });
+        
+        
         exportPhotoButton.setOnAction(e->{
             editController.processSnapshot();
         });
@@ -317,9 +324,60 @@ public class Workspace extends AppWorkspaceComponent{
      */
     private void addRightSideActions(){
         
-        addClassButton.setOnAction(e->{
-            dataManager.addNewClass();
-        });   
+        //adds variable to the currently selected pane
+        addVarButton.setOnAction(e->{
+            if(dataManager.isInState(UMLCreatorState.SELECTING_PANE)){
+                StackPane sp = dataManager.getSelectedPane();
+                Var newVar = new Var();
+                //cast to Draggable for now - could be DraggableClass or 
+                //DraggableInterface
+                Draggable selected= (Draggable)sp.getChildren().get(0);
+                if(selected instanceof DraggableClass){
+                    DraggableClass selectedClass = (DraggableClass)selected;
+                    selectedClass.addVar(newVar);
+                }
+                else{
+                    //TODO - update for DraggableInterface!
+                }
+                
+                String varString = newVar.toString();
+                Label newLabel = new Label(varString);
+                newLabel.getStyleClass().add("uml_label");
+                
+                //gets holder box
+                VBox holder = (VBox)sp.getChildren().get(1);
+                VBox varBox = (VBox)holder.getChildren().get(1);
+                varBox.getChildren().add(newLabel);
+           }
+        }); 
+       
+        //adds method to the currently selected pane
+        addMethodButton.setOnAction(e->{
+           if(dataManager.isInState(UMLCreatorState.SELECTING_PANE)){
+                StackPane sp = dataManager.getSelectedPane();
+                Method newMethod = new Method();
+               
+                //cast to Draggable for now - could be DraggableClass or 
+                //DraggableInterface
+                Draggable selected= (Draggable)sp.getChildren().get(0);
+                if(selected instanceof DraggableClass){
+                    DraggableClass selectedClass = (DraggableClass)selected;
+                    selectedClass.addMethod(newMethod);
+                }
+                else{
+                    //TODO - update for DraggableInterface!
+                }
+                
+                String methodString = newMethod.toString();
+                Label newLabel = new Label(methodString);
+                newLabel.getStyleClass().add("uml_label");
+                
+                //gets holder box
+                VBox holder = (VBox)sp.getChildren().get(1);
+                VBox methodBox = (VBox)holder.getChildren().get(2);
+                methodBox.getChildren().add(newLabel);
+           }
+        });
     }
 
     
