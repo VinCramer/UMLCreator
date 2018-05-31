@@ -9,6 +9,7 @@ Despite still having the functional original version of this project, this repos
 - Moving classes
 - Toggleable grid in the background
 - Ability to snap to aforementioned grid, even if the grid is not displayed
+- Removing classes
 - Taking screenshots of UML diagram
 
 # Program functions to include:
@@ -16,11 +17,12 @@ Despite still having the functional original version of this project, this repos
 - Loading from a JSON file
 - Exporting UML diagram to compiling Java code
 - Adding interfaces
-- Removing classes and interfaces
 - Displaying inheritance
 - Resizing classes and interfaces
 - Adding and editing variables and methods such as the visibility and if they are static
 - Zooming in and out
+- Updating display depending on the currently selected class or interface
+- Ability to edit nearly all features of classes and interfaces such as method and their names, return types, if they're abstract, etc.
 
 
 
