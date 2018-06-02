@@ -199,6 +199,30 @@ public class DraggableClass extends Rectangle implements Draggable{
     public ArrayList<Var> getVariableList() {
         return variableList;
     }
+    
+    public Var getVar(int x){
+        return variableList.get(x);
+    }
+    
+    public Method getMethod(int x){
+        return methodList.get(x);
+    }
+    
+    public Label getVarLabel(int x){
+        return variableLabelList.get(x);
+    }
+    
+    public void addVarLabel(Label l){
+        variableLabelList.add(l);
+    }
+    
+    public void addMethodLabel(Label l){
+        methodLabelList.add(l);
+    }
+    
+    public Label getMethodLabel(int x){
+        return methodLabelList.get(x);
+    }
 
     public void setVariableList(ArrayList<Var> variableList) {
         this.variableList = variableList;
@@ -220,6 +244,21 @@ public class DraggableClass extends Rectangle implements Draggable{
         this.variableLabelList = variableLabelList;
     }
     
+    public void setVariable(int x, Var v){
+        variableList.set(x, v);
+    }
     
+    public void setVariableLabel(int x, Label l){
+        variableLabelList.set(x, l);
+    }
+    
+    public void setMethod(int x, Method m){
+        methodList.set(x,m);
+    }
+    
+    public void setMethodLabel(int x, Label l){
+        methodLabelList.set(x, l);
+        varBox.getChildren().set(x, l);
+    }
     
 }

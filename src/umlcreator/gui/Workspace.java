@@ -2,6 +2,12 @@
 package umlcreator.gui;
 
 import java.util.ArrayList;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.control.Button;
@@ -11,11 +17,14 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import static javafx.scene.control.ScrollPane.ScrollBarPolicy.AS_NEEDED;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableColumn.CellDataFeatures;
+import javafx.scene.control.TableColumn.CellEditEvent;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
@@ -28,6 +37,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Scale;
 import javafx.stage.Screen;
+import javafx.util.Callback;
+import javax.swing.event.HyperlinkEvent;
 import properties_manager.PropertiesManager;
 import saf.AppTemplate;
 import saf.components.AppWorkspaceComponent;
@@ -88,8 +99,11 @@ public class Workspace extends AppWorkspaceComponent{
     
     CheckBox gridCheckBox, snapCheckBox;
     
-    TableColumn firstVC, secondVC, thirdVC, fourthVC, fifthVC, 
-            firstMC, secondMC, thirdMC, fourthMC, fifthMC;
+    TableColumn <Var, String> firstVC, secondVC, fourthVC;
+    TableColumn <Var, Boolean> thirdVC, fifthVC;
+    TableColumn <Method, String> firstMC, secondMC, fifthMC;
+    TableColumn <Method, Boolean> thirdMC, fourthMC;
+    
     
     /**
      * Constructor for the user's entire workspace
@@ -259,6 +273,7 @@ public class Workspace extends AppWorkspaceComponent{
         
         addClassButton.setOnAction(e->{
             dataManager.addNewClass();
+            updateComponentToolbar(dataManager.getSelectedPane());
         });
         
         
@@ -327,57 +342,76 @@ public class Workspace extends AppWorkspaceComponent{
         //adds variable to the currently selected pane
         addVarButton.setOnAction(e->{
             if(dataManager.isInState(UMLCreatorState.SELECTING_PANE)){
+                
                 StackPane sp = dataManager.getSelectedPane();
                 Var newVar = new Var();
-                //cast to Draggable for now - could be DraggableClass or 
-                //DraggableInterface
-                Draggable selected= (Draggable)sp.getChildren().get(0);
-                if(selected instanceof DraggableClass){
-                    DraggableClass selectedClass = (DraggableClass)selected;
-                    selectedClass.addVar(newVar);
-                }
-                else{
-                    //TODO - update for DraggableInterface!
-                }
                 
                 String varString = newVar.toString();
                 Label newLabel = new Label(varString);
                 newLabel.getStyleClass().add("uml_label");
                 
+                
+                Draggable selected= (Draggable)sp.getChildren().get(0);
+                if(selected instanceof DraggableClass){
+                    DraggableClass selectedClass = (DraggableClass)selected;
+                    selectedClass.addVar(newVar);
+                    selectedClass.addVarLabel(newLabel);
+                }
+                else{
+                    //TODO - update for DraggableInterface!
+                }
+                
+                
+                
                 //gets holder box
                 VBox holder = (VBox)sp.getChildren().get(1);
                 VBox varBox = (VBox)holder.getChildren().get(1);
                 varBox.getChildren().add(newLabel);
+                
+                updateComponentToolbar(dataManager.getSelectedPane());
            }
         }); 
        
         //adds method to the currently selected pane
         addMethodButton.setOnAction(e->{
            if(dataManager.isInState(UMLCreatorState.SELECTING_PANE)){
+                
                 StackPane sp = dataManager.getSelectedPane();
                 Method newMethod = new Method();
                
-                //cast to Draggable for now - could be DraggableClass or 
-                //DraggableInterface
+                String methodString = newMethod.toString();
+                Label newLabel = new Label(methodString);
+                newLabel.getStyleClass().add("uml_label");
+                
                 Draggable selected= (Draggable)sp.getChildren().get(0);
                 if(selected instanceof DraggableClass){
                     DraggableClass selectedClass = (DraggableClass)selected;
                     selectedClass.addMethod(newMethod);
+                    selectedClass.addMethodLabel(newLabel);
                 }
                 else{
                     //TODO - update for DraggableInterface!
                 }
                 
-                String methodString = newMethod.toString();
-                Label newLabel = new Label(methodString);
-                newLabel.getStyleClass().add("uml_label");
+                
                 
                 //gets holder box
                 VBox holder = (VBox)sp.getChildren().get(1);
                 VBox methodBox = (VBox)holder.getChildren().get(2);
                 methodBox.getChildren().add(newLabel);
+                
+                updateComponentToolbar(dataManager.getSelectedPane());
            }
         });
+        
+        removeVarButton.setOnAction(e->{
+            
+        });
+        
+        removeMethodButton.setOnAction(e->{
+            
+        });
+        
     }
 
     
@@ -796,9 +830,36 @@ public class Workspace extends AppWorkspaceComponent{
      */
     public void updateComponentToolbar(StackPane sp){
         
+        
+        
         VBox holder = (VBox)sp.getChildren().get(1);
         VBox variableBox = (VBox)holder.getChildren().get(1);
         VBox methodBox = (VBox)holder.getChildren().get(2);
+        
+        ObservableList tempVarList = variableBox.getChildren();
+        ObservableList tempMethodList = methodBox.getChildren();
+        
+        Draggable temp = (Draggable)sp.getChildren().get(0);
+        
+        DraggableClass draggableClass = null;
+        //DraggableInterface draggableInterface;
+        
+        if(temp instanceof DraggableClass){
+            draggableClass = (DraggableClass)temp;
+        }
+        //TODO - interface!
+        
+        //if not null, that means this is a class pane
+        if(draggableClass!=null){
+            
+            //fxcollections lets us convert from ArrayList to ObservableList
+            variableTable.setItems(FXCollections.observableArrayList
+        (draggableClass.getVariableList()));
+        
+            methodTable.setItems(FXCollections.observableArrayList
+        (draggableClass.getMethodList()));
+            
+        }
         
         variableTable.setEditable(true);
         methodTable.setEditable(true);
@@ -815,11 +876,238 @@ public class Workspace extends AppWorkspaceComponent{
         fourthMC.setEditable(true);
         fifthMC.setEditable(true);
         
-        //these are easy compared to the others
-        fifthVC.setCellFactory(CheckBoxTableCell.forTableColumn(fifthVC));
+        //defining what type of cell the first variable column will be
+        firstVC.setCellFactory(TextFieldTableCell.<Var>forTableColumn());
+        
+        //adding behavior to first variable column, which controls the 
+        //variable's name
+        firstVC.setOnEditCommit((CellEditEvent<Var, String> t)->{
+            
+            //these are used to update the correct variable and label in their 
+            //respective lists
+            int currentVarPosition = t.getTablePosition().getRow();
+            Var tempVar;
+            Label tempLabel;
+            
+            DraggableClass tempDraggableClass = null;
+            //DraggableInterface draggableInterface;
+        
+            if(temp instanceof DraggableClass){
+                tempDraggableClass = (DraggableClass)temp;
+            }
+            else{
+                //TODO - interface!
+            }
+            
+            if(tempDraggableClass != null){
+                //update var and replace label w/ new toString
+                tempVar = tempDraggableClass.getVar(currentVarPosition);
+                tempVar.setName(t.getNewValue());
+                tempLabel = tempDraggableClass.getVarLabel(currentVarPosition);
+                tempLabel.setText(tempVar.toString());
+                tempDraggableClass.setVariable(currentVarPosition,tempVar);
+                tempDraggableClass.setVariableLabel(currentVarPosition,
+                        tempLabel);
+                
+                variableBox.getChildren().set(currentVarPosition, tempLabel);
+            }
+           //interface later  
+        });
+        
+        secondVC.setCellFactory(TextFieldTableCell.<Var>forTableColumn());
+        
+        //TODO - update this later when API functionality is necessary
+        //handles the type of the variable
+        secondVC.setOnEditCommit((CellEditEvent<Var, String> t)->{
+            
+            
+            int currentVarPosition = t.getTablePosition().getRow();
+            Var tempVar;
+            Label tempLabel;
+            
+            DraggableClass tempDraggableClass = null;
+            //DraggableInterface draggableInterface;
+        
+            if(temp instanceof DraggableClass){
+                tempDraggableClass = (DraggableClass)temp;
+            }
+            else{
+                //interface
+            }
+            
+            if(tempDraggableClass!=null){
+                tempVar = tempDraggableClass.getVar(currentVarPosition);
+                tempVar.setType(t.getNewValue());
+                tempLabel = tempDraggableClass.getVarLabel(currentVarPosition);
+                tempLabel.setText(tempVar.toString());
+                
+                tempDraggableClass.setVariable(currentVarPosition,tempVar);
+                tempDraggableClass.setVariableLabel(currentVarPosition,
+                        tempLabel);
+                variableBox.getChildren().set(currentVarPosition, tempLabel);
+            }
+        });
+        
         thirdVC.setCellFactory(CheckBoxTableCell.forTableColumn(thirdVC));
         
-        //TODO - need to finish this method!
+        //handles the variable's static-ness
+        
+        
+        
+        fourthVC.setCellFactory(TextFieldTableCell.<Var>forTableColumn());
+        
+        //handles the variable's access (visibility, i.e. public/private/etc.)
+        fourthVC.setOnEditCommit((CellEditEvent<Var, String > t) -> {
+            int currentVarPosition = t.getTablePosition().getRow();
+            Var tempVar;
+            Label tempLabel;
+            
+            DraggableClass tempDraggableClass = null;
+            //DraggableInterface draggableInterface;
+        
+            if(temp instanceof DraggableClass){
+                tempDraggableClass = (DraggableClass)temp;
+            }
+            else{
+                //interface
+            }
+            
+            if(tempDraggableClass!=null){
+                tempVar = tempDraggableClass.getVar(currentVarPosition);
+                tempVar.setVisibility(t.getNewValue());
+                tempLabel = tempDraggableClass.getVarLabel(currentVarPosition);
+                tempLabel.setText(tempVar.toString());
+                
+                tempDraggableClass.setVariable(currentVarPosition,tempVar);
+                tempDraggableClass.setVariableLabel(currentVarPosition,
+                        tempLabel);
+                variableBox.getChildren().set(currentVarPosition, tempLabel);
+            }
+            
+        });
+        
+        fifthVC.setCellFactory(CheckBoxTableCell.forTableColumn(fifthVC));
+        
+        
+        
+        
+        //defining multiple types of cells at once
+        firstMC.setCellFactory(TextFieldTableCell.<Method>forTableColumn());
+        secondMC.setCellFactory(TextFieldTableCell.<Method>forTableColumn());
+        thirdMC.setCellFactory(CheckBoxTableCell.<Method>forTableColumn
+            (thirdMC));
+        fourthMC.setCellFactory(CheckBoxTableCell.<Method>forTableColumn
+            (fourthMC));
+        fifthMC.setCellFactory(TextFieldTableCell.<Method>forTableColumn());
+        
+        //method name
+        firstMC.setOnEditCommit((CellEditEvent<Method, String> t) -> {
+            int currentMethodPosition = t.getTablePosition().getRow();
+            Method tempMethod;
+            Label tempLabel;
+            
+            DraggableClass tempDraggableClass = null;
+            //DraggableInterface draggableInterface;
+        
+            if(temp instanceof DraggableClass){
+                tempDraggableClass = (DraggableClass)temp;
+            }
+            else{
+                //TODO - interface!
+            }
+            
+            if(tempDraggableClass != null){
+                //update var and replace label w/ new toString
+                tempMethod = tempDraggableClass.
+                        getMethod(currentMethodPosition);
+                tempMethod.setName(t.getNewValue());
+                
+                tempLabel = tempDraggableClass.getMethodLabel
+                    (currentMethodPosition);
+                tempLabel.setText(tempMethod.toString());
+                tempDraggableClass.setMethod(currentMethodPosition,tempMethod);
+                tempDraggableClass.setMethodLabel(currentMethodPosition,
+                        tempLabel);
+                
+                methodBox.getChildren().set(currentMethodPosition, tempLabel);
+            }
+           //interface later  
+        });
+        
+        //method return type
+        secondMC.setOnEditCommit((CellEditEvent<Method, String> t) -> {
+            int currentMethodPosition = t.getTablePosition().getRow();
+            Method tempMethod;
+            Label tempLabel;
+            
+            DraggableClass tempDraggableClass = null;
+            //DraggableInterface draggableInterface;
+        
+            if(temp instanceof DraggableClass){
+                tempDraggableClass = (DraggableClass)temp;
+            }
+            else{
+                //TODO - interface!
+            }
+            
+            if(tempDraggableClass != null){
+                //update var and replace label w/ new toString
+                tempMethod = tempDraggableClass.
+                        getMethod(currentMethodPosition);
+                tempMethod.setReturnType(t.getNewValue());
+                
+                tempLabel = tempDraggableClass.getMethodLabel
+                    (currentMethodPosition);
+                tempLabel.setText(tempMethod.toString());
+                tempDraggableClass.setMethod(currentMethodPosition,tempMethod);
+                tempDraggableClass.setMethodLabel(currentMethodPosition,
+                        tempLabel);
+                
+                methodBox.getChildren().set(currentMethodPosition, tempLabel);
+            }
+           //interface later  
+        });
+        
+        //static - checkbox
+        //thirdMC
+        
+        //abstract - checkbox
+        //fourthMC
+        
+        //accessibility/visibility
+        //fifthMC
+        fifthMC.setOnEditCommit((CellEditEvent<Method, String> t) -> {
+            int currentMethodPosition = t.getTablePosition().getRow();
+            Method tempMethod;
+            Label tempLabel;
+            
+            DraggableClass tempDraggableClass = null;
+            //DraggableInterface draggableInterface;
+        
+            if(temp instanceof DraggableClass){
+                tempDraggableClass = (DraggableClass)temp;
+            }
+            else{
+                //TODO - interface!
+            }
+            
+            if(tempDraggableClass != null){
+                //update var and replace label w/ new toString
+                tempMethod = tempDraggableClass.
+                        getMethod(currentMethodPosition);
+                tempMethod.setVisibility(t.getNewValue());
+                
+                tempLabel = tempDraggableClass.getMethodLabel
+                    (currentMethodPosition);
+                tempLabel.setText(tempMethod.toString());
+                tempDraggableClass.setMethod(currentMethodPosition,tempMethod);
+                tempDraggableClass.setMethodLabel(currentMethodPosition,
+                        tempLabel);
+                
+                methodBox.getChildren().set(currentMethodPosition, tempLabel);
+            }
+           //interface later  
+        });
     }
     
     /**
