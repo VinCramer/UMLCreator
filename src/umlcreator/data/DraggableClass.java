@@ -272,4 +272,20 @@ public class DraggableClass extends Rectangle implements Draggable{
         this.packageName=s;
     }
     
+    public void removeVar(Var v){
+        variableList.remove(v);
+    }
+    
+    public void removeVarLabel(int i){
+        variableLabelList.remove(i);
+    }
+    
+    public void removeMethod(Method m){
+        methodList.remove(m);
+    }
+    
+    public void removeMethodLabel(int i){
+        methodLabelList.remove(i);
+    }
+    
 }

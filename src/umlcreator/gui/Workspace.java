@@ -408,11 +408,75 @@ public class Workspace extends AppWorkspaceComponent{
         });
         
         removeVarButton.setOnAction(e->{
-            
+            if(dataManager.isInState(SELECTING_PANE)){
+                StackPane sp = dataManager.getSelectedPane();
+                Draggable selected= (Draggable)sp.getChildren().get(0);
+                
+                //no variables to remove
+                if(variableTable.getSelectionModel().getSelectedItem()==null){
+                    return;
+                }
+                
+                //gets us the row/variable user wants to remove
+                Var toBeRemoved = (Var)variableTable.getSelectionModel().
+                        getSelectedItem();
+                
+                
+                if(selected instanceof DraggableClass){
+                    DraggableClass selectedClass = (DraggableClass)selected;
+                    
+                    int index = selectedClass.getVariableList().indexOf
+                        (toBeRemoved);
+                    
+                    if(toBeRemoved != null){
+                        selectedClass.removeVar(toBeRemoved);
+                        selectedClass.removeVarLabel(index);
+                        selectedClass.getVarBox().getChildren().remove(index);
+                        
+                    }
+                }
+                else{
+                    //TODO - update for DraggableInterface!
+                }
+                
+                updateComponentToolbar(dataManager.getSelectedPane());
+            }
         });
         
         removeMethodButton.setOnAction(e->{
-            
+            if(dataManager.isInState(SELECTING_PANE)){
+                StackPane sp = dataManager.getSelectedPane();
+                Draggable selected= (Draggable)sp.getChildren().get(0);
+                
+                //no methods to remove
+                if(methodTable.getSelectionModel().getSelectedItem()==null){
+                    return;
+                }
+                
+                //gets us the row/method user wants to remove
+                Method toBeRemoved = (Method)methodTable.getSelectionModel().
+                        getSelectedItem();
+                
+                
+                if(selected instanceof DraggableClass){
+                    DraggableClass selectedClass = (DraggableClass)selected;
+                    
+                    int index = selectedClass.getMethodList().indexOf
+                        (toBeRemoved);
+                    
+                    if(toBeRemoved != null){
+                        selectedClass.removeMethod(toBeRemoved);
+                        selectedClass.removeMethodLabel(index);
+                        selectedClass.getMethodBox().getChildren().remove(index);
+                        
+                    }
+                }
+                else{
+                    //TODO - update for DraggableInterface!
+                }
+                
+                updateComponentToolbar(dataManager.getSelectedPane());
+            }
         });
         
     }
