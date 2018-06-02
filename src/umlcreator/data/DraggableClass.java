@@ -250,6 +250,7 @@ public class DraggableClass extends Rectangle implements Draggable{
     
     public void setVariableLabel(int x, Label l){
         variableLabelList.set(x, l);
+        varBox.getChildren().set(x, l);
     }
     
     public void setMethod(int x, Method m){
@@ -258,7 +259,7 @@ public class DraggableClass extends Rectangle implements Draggable{
     
     public void setMethodLabel(int x, Label l){
         methodLabelList.set(x, l);
-        varBox.getChildren().set(x, l);
+        methodBox.getChildren().set(x, l);
     }
     
 }
