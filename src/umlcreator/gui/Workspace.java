@@ -3,11 +3,13 @@ package umlcreator.gui;
 
 import java.util.ArrayList;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.event.EventHandler;
+import javafx.event.EventType;
 import javafx.geometry.Insets;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.control.Button;
@@ -48,6 +50,7 @@ import umlcreator.data.DataManager;
 import umlcreator.data.Draggable;
 import umlcreator.data.DraggableClass;
 import umlcreator.data.UMLCreatorState;
+import static umlcreator.data.UMLCreatorState.SELECTING_PANE;
 import umlcreator.file.FileManager;
 
 /**
@@ -835,6 +838,8 @@ public class Workspace extends AppWorkspaceComponent{
         VBox holder = (VBox)sp.getChildren().get(1);
         VBox variableBox = (VBox)holder.getChildren().get(1);
         VBox methodBox = (VBox)holder.getChildren().get(2);
+        VBox classBox = (VBox)holder.getChildren().get(0);
+        
         
         ObservableList tempVarList = variableBox.getChildren();
         ObservableList tempMethodList = methodBox.getChildren();
@@ -948,12 +953,46 @@ public class Workspace extends AppWorkspaceComponent{
             }
         });
         
-        thirdVC.setCellFactory(CheckBoxTableCell.forTableColumn(thirdVC));
-        
-        //handles the variable's static-ness
-        
-        
-        
+        //forces column to be checkbox, which is most intuitve for user
+        thirdVC.setCellFactory(column -> new CheckBoxTableCell<>());
+                
+        thirdVC.setCellValueFactory(t -> {
+            
+            Var cellValue = t.getValue();
+            BooleanProperty property = cellValue.getIsStaticBooleanProperty();
+            
+            //this updates our corresponding Var, but we still need to update 
+            //the GUI to show the user their changes.
+            property.addListener((observable, oldValue, newValue) -> 
+                    cellValue.setIsStatic(newValue));
+     
+            DraggableClass tempDraggableClass = null;
+            if(temp instanceof DraggableClass){
+                tempDraggableClass = (DraggableClass)temp;
+            }
+            
+            if(tempDraggableClass!=null){
+                int i=0;
+                Label l;
+                
+                //what we do here is re-do each and every variable label in this
+                //node's variableBox, since we don't have access to the 
+                //getTablePosition.getRow() like we do in other columns. We 
+                //could attempt to find only the older version of the variable 
+                //as a String, but that's an O(n) operation too and we'd need 
+                //another method in Var to find the older toString result, since
+                //the Var has already been changed. For simplicity's sake this 
+                //works, even if it isn't completely optimized.
+                for(i=0;i<variableBox.getChildren().size();i++){
+                    l = new Label(tempDraggableClass.getVar(i).toString());
+                    l.getStyleClass().add("uml_label");
+                    tempDraggableClass.setVariableLabel(i,l);
+                    variableBox.getChildren().set(i, l);
+                }
+            }
+            return property;
+        });
+                   
         fourthVC.setCellFactory(TextFieldTableCell.<Var>forTableColumn());
         
         //handles the variable's access (visibility, i.e. public/private/etc.)
@@ -986,11 +1025,39 @@ public class Workspace extends AppWorkspaceComponent{
             
         });
         
-        fifthVC.setCellFactory(CheckBoxTableCell.forTableColumn(fifthVC));
+        //set the column to be full of CheckBoxes
+        fifthVC.setCellFactory(column -> new CheckBoxTableCell<>());
+
+        fifthVC.setCellValueFactory(t -> {
+            
+            Var cellValue = t.getValue();
+            BooleanProperty property = cellValue.getIsFinalBooleanProperty();
+            
+            //updates Var; still need to update GUI
+            property.addListener((observable, oldValue, newValue) -> 
+                    cellValue.setIsFinal(newValue));
+      
+            DraggableClass tempDraggableClass = null;
+            if(temp instanceof DraggableClass){
+                tempDraggableClass = (DraggableClass)temp;
+            }
+            
+            if(tempDraggableClass!=null){
+                int i=0;
+                Label l;
+                
+                //see thirdVC for more details on why we use this
+                for(i=0;i<variableBox.getChildren().size();i++){
+                    l = new Label(tempDraggableClass.getVar(i).toString());
+                    l.getStyleClass().add("uml_label");
+                    tempDraggableClass.setVariableLabel(i,l);
+                    variableBox.getChildren().set(i, l);
+                }
+            }
+            return property;
+        });
         
-        
-        
-        
+  
         //defining multiple types of cells at once
         firstMC.setCellFactory(TextFieldTableCell.<Method>forTableColumn());
         secondMC.setCellFactory(TextFieldTableCell.<Method>forTableColumn());
@@ -1069,13 +1136,70 @@ public class Workspace extends AppWorkspaceComponent{
         });
         
         //static - checkbox
-        //thirdMC
+        thirdMC.setCellFactory(column -> new CheckBoxTableCell<>());
+        
+        thirdMC.setCellValueFactory(t -> {
+            
+            Method cellValue = t.getValue();
+            BooleanProperty property = cellValue.getIsStaticBooleanProperty();
+            
+            //updates Method, GUI later
+            property.addListener((observable, oldValue, newValue) -> 
+                    cellValue.setIsStatic(newValue));
+
+            DraggableClass tempDraggableClass = null;
+            if(temp instanceof DraggableClass){
+                tempDraggableClass = (DraggableClass)temp;
+            }
+            
+            if(tempDraggableClass!=null){
+                int i=0;
+                Label l;
+                
+                //same as thirdVC & fifthVC, but with methodBox
+                for(i=0;i<methodBox.getChildren().size();i++){
+                    l = new Label(tempDraggableClass.getMethod(i).toString());
+                    l.getStyleClass().add("uml_label");
+                    tempDraggableClass.setMethodLabel(i,l);
+                    methodBox.getChildren().set(i, l);
+                }
+            }
+            return property;
+        });
         
         //abstract - checkbox
-        //fourthMC
+        fourthMC.setCellFactory(column -> new CheckBoxTableCell<>());
+        
+        fourthMC.setCellValueFactory(t -> {
+            
+            Method cellValue = t.getValue();
+            BooleanProperty property = cellValue.getIsAbstractBooleanProperty();
+            
+            //updates Method, GUI later
+            property.addListener((observable, oldValue, newValue) -> 
+                    cellValue.setIsStatic(newValue));
+            
+            DraggableClass tempDraggableClass = null;
+            if(temp instanceof DraggableClass){
+                tempDraggableClass = (DraggableClass)temp;
+            }
+            
+            if(tempDraggableClass!=null){
+                int i=0;
+                Label l;
+                
+                //same as thirdVC & fifthVC, but with methodBox
+                for(i=0;i<methodBox.getChildren().size();i++){
+                    l = new Label(tempDraggableClass.getMethod(i).toString());
+                    l.getStyleClass().add("uml_label");
+                    tempDraggableClass.setMethodLabel(i,l);
+                    methodBox.getChildren().set(i, l);
+                }
+            }
+            return property;
+        });
         
         //accessibility/visibility
-        //fifthMC
         fifthMC.setOnEditCommit((CellEditEvent<Method, String> t) -> {
             int currentMethodPosition = t.getTablePosition().getRow();
             Method tempMethod;
@@ -1108,6 +1232,152 @@ public class Workspace extends AppWorkspaceComponent{
             }
            //interface later  
         });
+        
+        //We'll let the user add as many arguments as they want, and expand the 
+        //number of columns in the table so they can edit the type. For 
+        //simplicity's sake, they cannot change the name of the arguments from 
+        //the default, which is "arg" + the argument number, starting from 0.
+        ChangeListener<Object> cl = new ChangeListener<Object>(){
+            @Override
+            public void changed(ObservableValue<? extends Object> observable, 
+                    Object oldValue, Object newValue){
+                
+                //1 is max(right), 0 is min(left)
+                if(methodScrollPane.getHvalue()==1){
+                    
+                    //we use this size variable to determine which column was 
+                    //edited, if it's over a certain amount, it was an argument
+                    int size = methodTable.getColumns().size();
+                    TableColumn<Method,String> newTableColumn = new TableColumn
+                            <>(" ↓ Arg"+(size-4));
+                    
+                    newTableColumn.setMinWidth(100);
+                    
+                    newTableColumn.setCellFactory(TextFieldTableCell.
+                            <Method>forTableColumn());
+                    
+                    newTableColumn.setEditable(true);
+                    
+                    newTableColumn.setOnEditCommit(
+                            (CellEditEvent<Method,String> t)->{
+                        
+                        Method tempMethod = (Method) t.getTableView().getItems()
+                                .get(t.getTablePosition().getRow());
+
+                        //if argument column
+                        if(tempMethod.getArguments().size()<size-4){
+                            
+                            int j;
+                            for(j=tempMethod.getArguments().size();
+                                    j<size-4;j++){
+                                tempMethod.addArgument(" ");
+                            }
+                        }
+                        
+                        int methodPosition=(t.getTablePosition().getRow()); 
+                        
+                        tempMethod.setArgType(size-5,t.getNewValue());
+                        
+                        String m =tempMethod.toString();
+                        Label l = new Label(m);
+                        
+                        l.getStyleClass().add("uml_label");
+                        
+                        tempMethodList.set(methodPosition,l);
+                        DraggableClass tempDraggableClass = null;
+                        if(temp instanceof DraggableClass){
+                            tempDraggableClass = (DraggableClass)temp;
+                        }
+                            
+                        if(tempDraggableClass!=null){
+                            tempDraggableClass.setMethod(methodPosition, 
+                                    tempMethod);
+                            tempDraggableClass.setMethodLabel(methodPosition,l);
+                        }
+                        //interface...
+                        
+                        
+                        //assume primitive types for now
+                        
+                    });
+
+                    methodTable.getColumns().add(newTableColumn);
+                }
+            }
+        };
+        
+        methodScrollPane.hvalueProperty().addListener(cl);
+
+        
+
+        
+        //lets user change the package of their class/interface. The use of 
+        //periods denotes "levels", or nexted folders, which will be relevant 
+        //when changing names of the class/interface and exporting the code.
+        //Note that there is no GUI component to this field.
+        packageTextField.textProperty().addListener((observable, oldValue, 
+                newValue)->{
+            
+            //We need to get the selectedPane, becuase otherwise every single 
+            //pane's field changes. May be library issue.
+            if(dataManager.isInState(SELECTING_PANE)){
+                StackPane localPane = dataManager.getSelectedPane();
+                Draggable drag = (Draggable)localPane.getChildren().get(0);
+                DraggableClass tempDraggableClass = null;
+                
+                //interface
+                if(drag instanceof DraggableClass){
+                    tempDraggableClass = (DraggableClass)drag;
+                }
+                
+                if(tempDraggableClass!=null){
+                    
+                    tempDraggableClass.setPackageName(newValue);
+                }
+            }
+            
+            
+        });
+
+        //updates package name in right hand side
+        if(draggableClass!=null){
+            packageTextField.setText(draggableClass.getPackageName());
+        }
+        
+        
+        //let user change name of class/interface
+        classTextField.textProperty().addListener((observable, oldValue, 
+                newValue) -> {
+
+            //We need to get the selectedPane, becuase otherwise every single 
+            //pane's name field changes. May be library issue.
+            if(dataManager.isInState(SELECTING_PANE)){
+                StackPane localPane = dataManager.getSelectedPane();
+                Draggable drag = (Draggable)localPane.getChildren().get(0);
+                DraggableClass tempDraggableClass = null;
+                //interface
+                if(drag instanceof DraggableClass){
+                    tempDraggableClass = (DraggableClass)drag;
+                }
+                
+                if(tempDraggableClass!=null){
+                    
+                    Label newNameLabel = new Label(newValue);
+                    newNameLabel.getStyleClass().add("uml_label");
+                    tempDraggableClass.setNameLabel(newNameLabel);
+                    tempDraggableClass.getNameBox().getChildren().set(0,newNameLabel);
+                }
+            }
+            
+            
+        });
+        
+        //updates right side with current class's name
+        Label classLabel = (Label)classBox.getChildren().get(0);
+        classTextField.setText(classLabel.getText());
+        
+        
+        
     }
     
     /**

@@ -2,6 +2,8 @@
 package umlcreator.gui;
 
 import java.util.ArrayList;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 
 /**
  *
@@ -27,10 +29,10 @@ public class Method {
     private String visibility;
     private String name;
     private String returnType;
-    private boolean isStatic;
-    private boolean isAbstract;
+    private BooleanProperty isStatic;
+    private BooleanProperty isAbstract;
     
-    private ArrayList<String> argument;
+    private ArrayList<String> arguments;
     
     //we assume that each argument is an int
     private static String ARGUMENT_TYPE = "int";
@@ -47,9 +49,9 @@ public class Method {
         visibility = "public";
         name = "myMethod";
         returnType = "void";
-        isStatic = false;
-        isAbstract = false;
-        argument = new ArrayList();
+        isStatic = new SimpleBooleanProperty(false);
+        isAbstract = new SimpleBooleanProperty(false);
+        arguments = new ArrayList();
     }
     
     /**
@@ -88,9 +90,9 @@ public class Method {
         
         
         
-        if(!argument.isEmpty()){
-            for(int i=0;i<getArgument().size();i++){
-                s+=getARGUMENT_PREFIX() + (i+1) + ": " + getArgument().get(i) + ", ";
+        if(!arguments.isEmpty()){
+            for(int i=0;i<getArguments().size();i++){
+                s+=getARGUMENT_PREFIX() + (i+1) + ": " + getArguments().get(i) + ", ";
             }
             //remove the extra comma and space at the end
             s=s.substring(0,s.length()-2);
@@ -130,28 +132,61 @@ public class Method {
     }
 
     public boolean isIsStatic() {
-        return isStatic;
+        return isStatic.get();
     }
 
     public void setIsStatic(boolean isStatic) {
-        this.isStatic = isStatic;
+        this.isStatic.set(isStatic);
     }
 
     public boolean isIsAbstract() {
-        return isAbstract;
+        return isAbstract.get();
     }
 
     public void setIsAbstract(boolean isAbstract) {
-        this.isAbstract = isAbstract;
+        this.isAbstract.set(isAbstract);
     }
 
-    public ArrayList<String> getArgument() {
-        return argument;
+    public ArrayList<String> getArguments() {
+        return arguments;
     }
 
-    public void setArgument(ArrayList<String> argument) {
-        this.argument = argument;
+    public void setArguments(ArrayList<String> arguments) {
+        this.arguments = arguments;
+    }
+    
+    public BooleanProperty getIsAbstractBooleanProperty(){
+        return isAbstract;
+    }
+    
+    public BooleanProperty getIsStaticBooleanProperty(){
+        return isStatic;
     }
 
+    /**
+     * This method set the argument type at the given index. Additionally, if 
+     * the user enters null or the empty string, we interpret that to mean that 
+     * the user wants to remove that argument, so we remove that value from our 
+     * list.
+     * 
+     * @param pos
+     * Position of argument to be set or removed
+     * 
+     * @param type 
+     * Type of argument
+     */
+    public void setArgType(int pos, String type){
+        if(type.equals("") || type == null){
+            arguments.remove(pos);
+        }
+        else{
+            arguments.set(pos,type);
+        }
+        
+    }
+    
+    public void addArgument(String newArg){
+        arguments.add(newArg);
+    }
     
 }

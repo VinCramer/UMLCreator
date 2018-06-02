@@ -68,6 +68,8 @@ public class DraggableClass extends Rectangle implements Draggable{
         
         //prevents class from looking like black blob on user's screen
         this.setFill(Color.WHITE);
+        
+        packageName="";
 
     }
     
@@ -260,6 +262,14 @@ public class DraggableClass extends Rectangle implements Draggable{
     public void setMethodLabel(int x, Label l){
         methodLabelList.set(x, l);
         methodBox.getChildren().set(x, l);
+    }
+    
+    public String getPackageName(){
+        return packageName;
+    }
+    
+    public void setPackageName(String s){
+        this.packageName=s;
     }
     
 }

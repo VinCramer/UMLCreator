@@ -11,7 +11,7 @@ import javafx.beans.value.ObservableValue;
  */
 public class Var {
     private String visibility;
-    BooleanProperty isStatic;
+    private BooleanProperty isStatic;
     private String type;
     private BooleanProperty isFinal;
     private String name;
@@ -151,41 +151,13 @@ public class Var {
         return isFinal.get();
     }
     
-    /**
-     * Returns what the previous variable before any changes would've looked 
-     * like. Used in updateComponentToolbar in workspace to assist in a 
-     * workaround on a certain library.
-     * 
-     * @param oldStatic
-     * The old isStatic value
-     * 
-     * @param oldIsFinal
-     * The old isFinal value
-     * 
-     * @return 
-     * The Var represented as a String before the user's changes
-     */
-    public String toOldString(boolean oldStatic, boolean oldIsFinal){
-        String s = "";
-        if(visibility.equals("public"))
-            s+="+";
-        else if(visibility.equals("private"))
-            s+="-";
-        else if(visibility.equals("protected"))
-            s+="#";    
-        else //print nothing for default protection & gibberish
-            s+="";
-        
-        
-        if(oldStatic)
-            s+="$";
-        if(oldIsFinal)
-            name=name.toUpperCase();
-            
-        s+=name;
-        s+=": ";
-        s+=type;
-        return s;
+    
+    public BooleanProperty getIsStaticBooleanProperty(){
+        return isStatic;
+    }
+    
+    public BooleanProperty getIsFinalBooleanProperty(){
+        return isFinal;
     }
     
 }
