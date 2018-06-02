@@ -10,6 +10,7 @@ Despite still having the functional original version of this project, this repos
 - Toggleable grid in the background
 - Ability to snap to aforementioned grid, even if the grid is not displayed
 - Removing classes
+- Adding methods and variables to classes
 - Taking screenshots of UML diagram
 
 # Program functions to include:
@@ -19,7 +20,7 @@ Despite still having the functional original version of this project, this repos
 - Adding interfaces
 - Displaying inheritance
 - Resizing classes and interfaces
-- Adding and editing variables and methods such as the visibility and if they are static
+- Editing variables and methods such as the visibility and if they are static
 - Zooming in and out
 - Updating display depending on the currently selected class or interface
 - Ability to edit nearly all features of classes and interfaces such as method and their names, return types, if they're abstract, etc.
