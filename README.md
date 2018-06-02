@@ -11,6 +11,8 @@ Despite still having the functional original version of this project, this repos
 - Ability to snap to aforementioned grid, even if the grid is not displayed
 - Removing classes
 - Adding methods and variables to classes
+- Editing aspects variables and methods in classes such as the visibility and if they are static
+- Updating display depending on the currently selected class or interface
 - Taking screenshots of UML diagram
 
 # Program functions to include:
@@ -20,10 +22,7 @@ Despite still having the functional original version of this project, this repos
 - Adding interfaces
 - Displaying inheritance
 - Resizing classes and interfaces
-- Editing variables and methods such as the visibility and if they are static
 - Zooming in and out
-- Updating display depending on the currently selected class or interface
-- Ability to edit nearly all features of classes and interfaces such as method and their names, return types, if they're abstract, etc.
 
 
 
@@ -32,7 +31,11 @@ Despite still having the functional original version of this project, this repos
 This is the new layout, with icons provided by feather.netlify (https://feather.netlify.com/):
 ![umlcreator gui v1](https://user-images.githubusercontent.com/32882792/38576255-a18dbb96-3ccb-11e8-953d-7abd9564aa61.PNG)
 
-This is an an example of a how a parent-child relationship, variables, methods, and an API would be represented in my older version of this project:
+This is an an example of a how a parent-child relationship, variables, methods, and an API would be represented in my older version of this project, which may change in my final iteration:
 
 
 ![219 example](https://user-images.githubusercontent.com/32882792/38476046-cb22ff1e-3b79-11e8-8712-0ac6f8973f66.PNG)
+
+
+This is an example of the newest version's layout in effect, as of 2018-06-02:
+![updated project 2018-06-02](https://user-images.githubusercontent.com/32882792/40878986-435cbf98-6667-11e8-93a4-711beac21414.PNG)
