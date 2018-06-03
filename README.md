@@ -13,6 +13,7 @@ Despite still having the functional original version of this project, this repos
 - Adding methods and variables to classes
 - Editing aspects variables and methods in classes such as the visibility and if they are static
 - Updating display depending on the currently selected class or interface
+- Removing variables and methods added by the user
 - Taking screenshots of UML diagram
 
 # Program functions to include:
