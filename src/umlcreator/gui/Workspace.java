@@ -36,6 +36,7 @@ import javafx.scene.layout.RowConstraints;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Scale;
 import javafx.stage.Screen;
@@ -108,6 +109,9 @@ public class Workspace extends AppWorkspaceComponent{
     TableColumn <Method, Boolean> thirdMC, fourthMC;
     
     
+    ArrayList<String> primitives;
+    
+    
     /**
      * Constructor for the user's entire workspace
      * 
@@ -115,6 +119,18 @@ public class Workspace extends AppWorkspaceComponent{
      * The app template we use to access the gui and other features
      */
     public Workspace(AppTemplate initApp){
+        
+        //define the types of data which are primitives, used later
+        primitives = new ArrayList();
+        primitives.add("char");
+        primitives.add("int");
+        primitives.add("double");
+        primitives.add("float");
+        primitives.add("boolean");
+        primitives.add("short");
+        primitives.add("long");
+        primitives.add("byte");
+        
         
         //making the workspace visible to the user
         app = initApp;
@@ -985,7 +1001,7 @@ public class Workspace extends AppWorkspaceComponent{
         
         secondVC.setCellFactory(TextFieldTableCell.<Var>forTableColumn());
         
-        //TODO - update this later when API functionality is necessary
+        
         //handles the type of the variable
         secondVC.setOnEditCommit((CellEditEvent<Var, String> t)->{
             
@@ -1014,6 +1030,39 @@ public class Workspace extends AppWorkspaceComponent{
                 tempDraggableClass.setVariableLabel(currentVarPosition,
                         tempLabel);
                 variableBox.getChildren().set(currentVarPosition, tempLabel);
+                
+                //if the type isn't primitive, we need to add an API and pane 
+                //if necessary
+                if(!primitives.contains(t.getNewValue())){
+                    if(!tempDraggableClass.hasAPIPane()){
+                        addApiPane(sp, tempDraggableClass, t.getNewValue());
+                    }
+                    else{
+                        
+                        //if the class already has an APIPane, we should check 
+                        //and see if this data type is already included in that 
+                        //pane. If so, we won't add anything to the pane.
+                        StackPane apiPane = tempDraggableClass.getAPIPane();
+                        VBox tempVBox = (VBox)apiPane.getChildren().get(1);
+                        boolean found = false;
+                        for(Object o: tempVBox.getChildren()){
+                            Label l = (Label)o;
+                            String currentAPI = l.getText();
+                            if(currentAPI.equals(t.getNewValue())){
+                                found=true;
+                                break;
+                            }
+                        }
+                        
+                        //if the new variable type isn't primitive and isn't one
+                        //of the listed APIs for this class
+                        if(!found){
+                            addAPI(tempDraggableClass, t.getNewValue());
+                        }
+                        
+                    }
+                }
+                
             }
         });
         
@@ -1148,7 +1197,7 @@ public class Workspace extends AppWorkspaceComponent{
             }
             
             if(tempDraggableClass != null){
-                //update var and replace label w/ new toString
+                //update method and replace label w/ new toString
                 tempMethod = tempDraggableClass.
                         getMethod(currentMethodPosition);
                 tempMethod.setName(t.getNewValue());
@@ -1182,7 +1231,7 @@ public class Workspace extends AppWorkspaceComponent{
             }
             
             if(tempDraggableClass != null){
-                //update var and replace label w/ new toString
+                //update method and replace label w/ new toString
                 tempMethod = tempDraggableClass.
                         getMethod(currentMethodPosition);
                 tempMethod.setReturnType(t.getNewValue());
@@ -1195,6 +1244,40 @@ public class Workspace extends AppWorkspaceComponent{
                         tempLabel);
                 
                 methodBox.getChildren().set(currentMethodPosition, tempLabel);
+                
+                
+                //if the return type isn't primitive, we need to add an API and 
+                //pane if necessary
+                if(!primitives.contains(t.getNewValue())){
+                    if(!tempDraggableClass.hasAPIPane()){
+                        addApiPane(sp, tempDraggableClass, t.getNewValue());
+                    }
+                    else{
+                        
+                        //if the class already has an APIPane, we should check 
+                        //and see if this data type is already included in that 
+                        //pane. If so, we won't add anything to the pane.
+                        StackPane apiPane = tempDraggableClass.getAPIPane();
+                        VBox tempVBox = (VBox)apiPane.getChildren().get(1);
+                        boolean found = false;
+                        for(Object o: tempVBox.getChildren()){
+                            Label l = (Label)o;
+                            String currentAPI = l.getText();
+                            if(currentAPI.equals(t.getNewValue())){
+                                found=true;
+                                break;
+                            }
+                        }
+                        
+                        //if the new return type isn't primitive and isn't one
+                        //of the listed APIs for this class
+                        if(!found){
+                            addAPI(tempDraggableClass, t.getNewValue());
+                        }
+                        
+                    }
+                }
+                
             }
            //interface later  
         });
@@ -1280,7 +1363,7 @@ public class Workspace extends AppWorkspaceComponent{
             }
             
             if(tempDraggableClass != null){
-                //update var and replace label w/ new toString
+                //update method and replace label w/ new toString
                 tempMethod = tempDraggableClass.
                         getMethod(currentMethodPosition);
                 tempMethod.setVisibility(t.getNewValue());
@@ -1357,12 +1440,49 @@ public class Workspace extends AppWorkspaceComponent{
                             tempDraggableClass.setMethod(methodPosition, 
                                     tempMethod);
                             tempDraggableClass.setMethodLabel(methodPosition,l);
+                            
+                            //if the type isn't primitive, we need to add an API
+                            //and pane if necessary
+                            if(!primitives.contains(t.getNewValue())){
+                                if(!tempDraggableClass.hasAPIPane()){
+                                    addApiPane(sp, tempDraggableClass, 
+                                        t.getNewValue());
+                                }
+                                else{
+                        
+                                    //if the class already has an APIPane, we 
+                                    //should check and see if this data type is 
+                                    //already included in that pane. If so, we 
+                                    //won't add anything to the pane.
+                                    StackPane apiPane = tempDraggableClass
+                                            .getAPIPane();
+                                    VBox tempVBox = (VBox)apiPane.getChildren()
+                                            .get(1);
+                                    boolean found = false;
+                                    for(Object o: tempVBox.getChildren()){
+                                        Label tempLabel = (Label)o;
+                                        String currentAPI = tempLabel.getText();
+                                        if(currentAPI.equals(t.getNewValue())){
+                                            found=true;
+                                            break;
+                                        }
+                                    }
+                        
+                                    //if the new method arg type isn't primitive 
+                                    //and isn't one of the listed APIs for this 
+                                    //class
+                                    if(!found){
+                                        addAPI(tempDraggableClass, 
+                                            t.getNewValue());
+                                    }
+                        
+                                }
+                            }
                         }
                         //interface...
                         
                         
-                        //assume primitive types for now
-                        
+                    
                     });
 
                     methodTable.getColumns().add(newTableColumn);
@@ -1493,6 +1613,24 @@ public class Workspace extends AppWorkspaceComponent{
             }
             
         }
+        Draggable draggable = (Draggable)sp.getChildren().get(0);
+        
+        if(draggable instanceof DraggableClass){
+            DraggableClass dc = (DraggableClass)draggable;
+            if(dc.hasAPIPane()){
+                StackPane tempPane = dc.getAPIPane();
+                Line tempLine = dc.getAPILine();
+                tempPane.setLayoutX(sp.getLayoutX()-75);
+                tempPane.setLayoutY(sp.getLayoutY()+sp.getHeight()/2.0
+                        -tempLine.getStrokeWidth());
+                
+                tempLine.setStartX(sp.getLayoutX()-50);
+                tempLine.setStartY(sp.getLayoutY()+sp.getHeight()/2.0);
+                tempLine.setEndX(sp.getLayoutX());
+                tempLine.setEndY(sp.getLayoutY()+sp.getHeight()/2.0);
+            }
+        }
+        
     }
 
 
@@ -1585,4 +1723,70 @@ public class Workspace extends AppWorkspaceComponent{
             }
         }
     }
+    
+    /**
+     * Creates and displays a pane showing the external library dependencies of 
+     * the class, with a line between the APIPane and the class pane.
+     * 
+     * @param sp
+     * StackPane in workspace that new APIPane's position will be relative to
+     * 
+     * @param dc
+     * The class which will contain references to the new APIPane
+     * 
+     * @param api
+     * The name of the external library
+     */
+    public void addApiPane(StackPane sp, DraggableClass dc, String api){
+        
+        //need to add a line as well as a pane
+        Line l = new Line(sp.getLayoutX()-50,sp.getLayoutY()+sp.getHeight()/2.0,
+                sp.getLayoutX(),sp.getLayoutY()+sp.getHeight()/2.0);
+        
+        //make line visible to user
+        workspace.getChildren().add(l);
+        
+        //add reference for later
+        dc.setAPILine(l);
+        
+        //now create pane and everything inside of it
+        StackPane apiPane = new StackPane();
+        apiPane.getStyleClass().add("api_stack_pane");
+        Rectangle r = new Rectangle(50,30);
+        r.setFill(Color.WHITE);
+        VBox apiVBox = new VBox();
+        apiVBox.getStyleClass().add("rect_vbox");
+        Label apiLabel = new Label(api);
+        apiLabel.getStyleClass().add("uml_label");
+        apiVBox.getChildren().add(apiLabel);
+        apiPane.getChildren().addAll(r,apiVBox);
+        
+        //position properly
+        apiPane.setLayoutX(sp.getLayoutX()-75);
+        apiPane.setLayoutY(sp.getLayoutY()+sp.getHeight()/2.0
+                -l.getStrokeWidth());
+        
+        //make visible to user
+        workspace.getChildren().add(apiPane);
+        
+        //reference for later
+        dc.setAPIPane(apiPane);
+    }
+    
+    /**
+     * Adds a library to the class's APIPane
+     * 
+     * @param dc
+     * The class which is adding the external library
+     * 
+     * @param api 
+     * The library itself
+     */
+    public void addAPI(DraggableClass dc, String api){
+        Label l = new Label(api);
+        l.getStyleClass().add("uml_label");
+        VBox tempVBox = (VBox)dc.getAPIPane().getChildren().get(1);
+        tempVBox.getChildren().add(l);
+    }
+    
 }

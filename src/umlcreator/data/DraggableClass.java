@@ -7,6 +7,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
+import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import static umlcreator.data.UMLCreatorState.STARTING_CLASS;
 import umlcreator.gui.Method;
@@ -37,6 +39,11 @@ public class DraggableClass extends Rectangle implements Draggable{
     public double startX, startY;
     
     private String packageName;
+    
+    private StackPane apiPane;
+    private Line apiLine;
+    
+    
     
     //TODO - need to choose way to store references to parents
     
@@ -70,7 +77,10 @@ public class DraggableClass extends Rectangle implements Draggable{
         this.setFill(Color.WHITE);
         
         packageName="";
-
+        
+        apiPane = null;
+        apiLine = null;
+          
     }
     
     /**
@@ -286,6 +296,26 @@ public class DraggableClass extends Rectangle implements Draggable{
     
     public void removeMethodLabel(int i){
         methodLabelList.remove(i);
+    }
+    
+    public boolean hasAPIPane(){
+        return apiPane!=null;
+    }
+    
+    public void setAPILine(Line l){
+        apiLine=l;
+    }
+    
+    public Line getAPILine(){
+        return apiLine;
+    }
+    
+    public void setAPIPane(StackPane apiPane){
+        this.apiPane=apiPane;
+    }
+    
+    public StackPane getAPIPane(){
+        return apiPane;
     }
     
 }
