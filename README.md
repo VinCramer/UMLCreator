@@ -15,6 +15,7 @@ Despite still having the functional original version of this project, this repos
 - Updating display depending on the currently selected class or interface
 - Removing variables and methods added by the user
 - Taking screenshots of UML diagram
+- Automatically adding a pane to indicate what external libraries are potentially necessary
 
 # Program functions to include:
 - Saving to a JSON file
@@ -40,3 +41,6 @@ This is an an example of a how a parent-child relationship, variables, methods, 
 
 This is an example of the newest version's layout in effect, as of 2018-06-02:
 ![updated project 2018-06-02](https://user-images.githubusercontent.com/32882792/40878986-435cbf98-6667-11e8-93a4-711beac21414.PNG)
+
+This is how variable and method API requirements will be handled in the current version, as of 2018-06-03:
+![updated project 2018-06-03](https://user-images.githubusercontent.com/32882792/40889319-9c0a9b44-6732-11e8-9df6-e0f167dcd293.PNG)
