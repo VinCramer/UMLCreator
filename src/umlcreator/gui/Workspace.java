@@ -1560,7 +1560,67 @@ public class Workspace extends AppWorkspaceComponent{
         Label classLabel = (Label)classBox.getChildren().get(0);
         classTextField.setText(classLabel.getText());
         
+        //display a drop-down list of all potential parents. Note that as per 
+        //the original design reqruirement, classes can have multiple parents, 
+        //there is no way to remove inheritance, and interface are not inherited
+        //(or extended) but are implemented.
+        ArrayList<String> potentialParents = new ArrayList();
+        for(Pane p: userMadePanes){
+            VBox tempHolder = (VBox)p.getChildren().get(1);
+            VBox nameHolder = (VBox)tempHolder.getChildren().get(0);
+            Label tempNameLabel = (Label)nameHolder.getChildren().get(0);
+            String tempName = tempNameLabel.getText();
+            
+            if(draggableClass != null){
+                
+                //you cannot be your own parent.
+                if(!draggableClass.getNameLabel().getText().equals(tempName)){
+                    potentialParents.add(tempName);
+                }
+            }
+            
+        }
         
+        //we need to clear the suggestions list, then add all of the new valid 
+        //options
+        parentComboBox.getItems().clear();
+        parentComboBox.getItems().addAll(potentialParents);
+        
+        //TODO - finish!
+        //update the class's parent/interface(s) used
+        parentComboBox.setOnAction((event -> {
+            if(dataManager.isInState(SELECTING_PANE)){
+                
+                if(parentComboBox.getSelectionModel()!=null && 
+                        parentComboBox.getSelectionModel().getSelectedItem()
+                        !=null){
+                    
+                    String parentName = parentComboBox.getSelectionModel().
+                            getSelectedItem().toString();
+                    
+                    if(parentName.equals("Object") || 
+                            parentName.equals("dummyParent")){
+                        return;
+                    }
+                    
+                    
+                    
+                    StackPane localPane = dataManager.getSelectedPane();
+                    Draggable drag = (Draggable)localPane.getChildren().get(0);
+                    DraggableClass tempDraggableClass = null;
+                    //interface
+                    if(drag instanceof DraggableClass){
+                        tempDraggableClass = (DraggableClass)drag;
+                    }
+
+                    if(tempDraggableClass!=null){
+                        //TODO - finish functionality
+                    }
+                    
+                    
+                }
+            }
+        }));
         
     }
     
