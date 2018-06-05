@@ -158,7 +158,7 @@ public class Workspace extends AppWorkspaceComponent{
         //adjusting toolbars to screen's dimensions
         componentToolbar.setPrefWidth(screenWidth/3);
         componentToolbar.setPrefHeight(screenHeight*.9 - 20);
-
+        
         designRenderer.setPrefWidth(screenWidth*(2.0/3.0));
         designRenderer.setPrefHeight(screenHeight*.9);
         designRenderer.setMinHeight(screenHeight*.9);
@@ -826,7 +826,7 @@ public class Workspace extends AppWorkspaceComponent{
         designRendererScrollPane.setFitToHeight(true);
         designRendererScrollPane.setFitToWidth(true);
         designRendererScrollPane.setHbarPolicy(AS_NEEDED);
-        designRendererScrollPane.setVbarPolicy(AS_NEEDED);
+        designRendererScrollPane.setVbarPolicy(AS_NEEDED); 
     }
 
     /**
@@ -1586,8 +1586,7 @@ public class Workspace extends AppWorkspaceComponent{
         parentComboBox.getItems().clear();
         parentComboBox.getItems().addAll(potentialParents);
         
-        //TODO - finish!
-        //update the class's parent/interface(s) used
+        
         parentComboBox.setOnAction((event -> {
             if(dataManager.isInState(SELECTING_PANE)){
                 
@@ -1614,7 +1613,64 @@ public class Workspace extends AppWorkspaceComponent{
                     }
 
                     if(tempDraggableClass!=null){
-                        //TODO - finish functionality
+                        
+                        //update referential line
+                        if(tempDraggableClass.hasParent()){
+                            //remove old parent line
+                            workspace.getChildren().remove(tempDraggableClass
+                                .getParentLine());
+                            
+                            //remove reference to child
+                            DraggableClass parent = (DraggableClass)
+                                tempDraggableClass.getParentPane().
+                                getChildren().get(0);
+                            
+                            parent.setChildPane(null);
+                        }
+                        
+                            
+                        //loop through all classes to get the pane for 
+                        //reference
+                        for(StackPane pane : userMadePanes){
+                            VBox tempHolder = (VBox)pane.getChildren().get(1);
+                            VBox nameHolder = (VBox)tempHolder.getChildren()
+                                .get(0);
+                            Label tempNameLabel = (Label)nameHolder.
+                                getChildren().get(0);
+                            String tempParentName = tempNameLabel.getText();
+                                
+                            if(tempParentName.equals(parentName)){
+                                    
+                                //give child references to parent
+                                tempDraggableClass.setParentPane(pane);
+                                Line parentLine = new Line(sp.getLayoutX()+
+                                    sp.getWidth()/2.0,
+                                    sp.getLayoutY(),
+                                    pane.getLayoutX()+pane.getWidth()/2.0,
+                                    pane.getLayoutY()+pane.getHeight());
+                                workspace.getChildren().add(parentLine);
+                                tempDraggableClass.setParentLine(parentLine);
+                                    
+                                //need to have parent reference child too 
+                                //for movement in workspace
+                                Draggable parentDraggable = (Draggable)
+                                    pane.getChildren().get(0);
+                                    
+                                DraggableClass parentDC = null;
+                                    
+                                if(parentDraggable instanceof DraggableClass){
+                                    parentDC = (DraggableClass)parentDraggable;
+                                }
+                                    
+                                if(parentDC!=null){
+                                    parentDC.setChildPane(sp);
+                                        
+                                }
+                                    
+                                break;
+                            }
+                        }
+                        
                     }
                     
                     
@@ -1673,10 +1729,14 @@ public class Workspace extends AppWorkspaceComponent{
             }
             
         }
+        
         Draggable draggable = (Draggable)sp.getChildren().get(0);
         
+        //handle api and inheritance lines/panes
         if(draggable instanceof DraggableClass){
             DraggableClass dc = (DraggableClass)draggable;
+            
+            //handles api movement
             if(dc.hasAPIPane()){
                 StackPane tempPane = dc.getAPIPane();
                 Line tempLine = dc.getAPILine();
@@ -1689,6 +1749,22 @@ public class Workspace extends AppWorkspaceComponent{
                 tempLine.setEndX(sp.getLayoutX());
                 tempLine.setEndY(sp.getLayoutY()+sp.getHeight()/2.0);
             }
+            
+            //handle if the pane has a parent
+            if(dc.hasParent()){
+                dc.getParentLine().setStartX(sp.getLayoutX()+sp.getWidth()/2.0);
+                dc.getParentLine().setStartY(sp.getLayoutY());
+            }
+            
+            //handle if the pane has a child
+            if(dc.hasChild()){
+                StackPane childPane = dc.getChildPane();
+                DraggableClass child = (DraggableClass)
+                        childPane.getChildren().get(0);
+                child.getParentLine().setEndX(sp.getLayoutX()+sp.getWidth()/2.0);
+                child.getParentLine().setEndY(sp.getLayoutY()+sp.getHeight());
+            }
+            
         }
         
     }

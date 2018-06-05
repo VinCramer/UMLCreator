@@ -43,9 +43,11 @@ public class DraggableClass extends Rectangle implements Draggable{
     private StackPane apiPane;
     private Line apiLine;
     
+    private StackPane parentPane;
+    private Line parentLine;
     
+    private StackPane childPane;
     
-    //TODO - need to choose way to store references to parents
     
     public DraggableClass(){
         
@@ -80,7 +82,11 @@ public class DraggableClass extends Rectangle implements Draggable{
         
         apiPane = null;
         apiLine = null;
+        
+        parentPane = null;
+        parentLine = null;
           
+        childPane = null;
     }
     
     /**
@@ -316,6 +322,38 @@ public class DraggableClass extends Rectangle implements Draggable{
     
     public StackPane getAPIPane(){
         return apiPane;
+    }
+    
+    public boolean hasParent(){
+        return parentPane!=null;
+    }
+    
+    public Line getParentLine(){
+        return parentLine;
+    }
+    
+    public StackPane getParentPane(){
+        return parentPane;
+    }
+    
+    public void setParentLine(Line parentLine){
+        this.parentLine=parentLine;
+    }
+    
+    public void setParentPane(StackPane parentPane){
+        this.parentPane = parentPane;
+    }
+    
+    public boolean hasChild(){
+        return childPane!=null;
+    }
+    
+    public void setChildPane(StackPane sp){
+        childPane = sp;
+    }
+    
+    public StackPane getChildPane(){
+        return childPane;
     }
     
 }
