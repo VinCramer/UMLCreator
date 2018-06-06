@@ -50,6 +50,7 @@ import umlcreator.controller.EditController;
 import umlcreator.data.DataManager;
 import umlcreator.data.Draggable;
 import umlcreator.data.DraggableClass;
+import umlcreator.data.DraggableInterface;
 import umlcreator.data.UMLCreatorState;
 import static umlcreator.data.UMLCreatorState.SELECTING_PANE;
 import umlcreator.file.FileManager;
@@ -295,6 +296,11 @@ public class Workspace extends AppWorkspaceComponent{
             updateComponentToolbar(dataManager.getSelectedPane());
         });
         
+        addInterfaceButton.setOnAction(e-> {
+            dataManager.addNewInterface();
+            updateComponentToolbar(dataManager.getSelectedPane());
+        });
+        
         
         exportPhotoButton.setOnAction(e->{
             editController.processSnapshot();
@@ -346,8 +352,42 @@ public class Workspace extends AppWorkspaceComponent{
         removeButton.setOnAction(e->{
             //if we've selected a pane, remove that pane. Otherwise, do nothing.
             if(dataManager.isInState(UMLCreatorState.SELECTING_PANE)){
-                userMadePanes.remove(dataManager.getSelectedPane());
+                StackPane tempPane = dataManager.getSelectedPane();
+                Draggable d = (Draggable)tempPane.getChildren().get(0);
+                
+                //remove the pane from user's view and list of all 
+                //class/interfaces
+                userMadePanes.remove(tempPane);
                 workspace.getChildren().remove(dataManager.getSelectedPane());
+                
+                DraggableClass dc = null;
+                DraggableInterface di = null;
+                
+                if(d instanceof DraggableClass){
+                    dc = (DraggableClass)d;
+                }
+                else{
+                    di = (DraggableInterface)d;
+                }
+                
+                //TODO - need to remove parent-child lines if either parent or 
+                //child is removed
+                
+                //need to remove api lines and api pane if hosting 
+                //class/interface is removed
+                if(dc != null){
+                    if(dc.hasAPIPane()){
+                        workspace.getChildren().remove(dc.getAPIPane());
+                        workspace.getChildren().remove(dc.getAPILine());
+                    }
+                }
+                else{
+                    if(di.hasAPIPane()){
+                        workspace.getChildren().remove(di.getAPILine());
+                        workspace.getChildren().remove(di.getAPIPane());
+                    }
+                }
+                
             }
         });
         
@@ -377,7 +417,10 @@ public class Workspace extends AppWorkspaceComponent{
                     selectedClass.addVarLabel(newLabel);
                 }
                 else{
-                    //TODO - update for DraggableInterface!
+                    DraggableInterface selectedInterface = (DraggableInterface)
+                        selected;
+                    selectedInterface.addVar(newVar);
+                    selectedInterface.addVarLabel(newLabel);
                 }
                 
                 
@@ -409,7 +452,10 @@ public class Workspace extends AppWorkspaceComponent{
                     selectedClass.addMethodLabel(newLabel);
                 }
                 else{
-                    //TODO - update for DraggableInterface!
+                    DraggableInterface selectedInterface = (DraggableInterface)
+                        selected;
+                    selectedInterface.addMethod(newMethod);
+                    selectedInterface.addMethodLabel(newLabel);
                 }
                 
                 
@@ -451,9 +497,22 @@ public class Workspace extends AppWorkspaceComponent{
                         
                     }
                 }
+                
                 else{
-                    //TODO - update for DraggableInterface!
+                    DraggableInterface selectedInterface = (DraggableInterface)
+                        selected;
+                    int index = selectedInterface.getVariableList().indexOf
+                        (toBeRemoved);
+                    
+                    if(toBeRemoved != null){
+                        selectedInterface.removeVar(toBeRemoved);
+                        selectedInterface.removeVarLabel(index);
+                        selectedInterface.getVarBox().getChildren().
+                            remove(index);
+                        
+                    }
                 }
+                
                 
                 updateComponentToolbar(dataManager.getSelectedPane());
             }
@@ -488,7 +547,19 @@ public class Workspace extends AppWorkspaceComponent{
                     }
                 }
                 else{
-                    //TODO - update for DraggableInterface!
+                    DraggableInterface selectedInterface = (DraggableInterface)
+                        selected;
+                    
+                    int index = selectedInterface.getMethodList().indexOf
+                        (toBeRemoved);
+                    
+                    if(toBeRemoved != null){
+                        selectedInterface.removeMethod(toBeRemoved);
+                        selectedInterface.removeMethodLabel(index);
+                        selectedInterface.getMethodBox().getChildren().
+                                remove(index);
+                        
+                    }
                 }
                 
                 updateComponentToolbar(dataManager.getSelectedPane());
@@ -927,23 +998,33 @@ public class Workspace extends AppWorkspaceComponent{
         Draggable temp = (Draggable)sp.getChildren().get(0);
         
         DraggableClass draggableClass = null;
-        //DraggableInterface draggableInterface;
+        DraggableInterface draggableInterface = null;
         
         if(temp instanceof DraggableClass){
             draggableClass = (DraggableClass)temp;
         }
-        //TODO - interface!
+        else{
+            draggableInterface = (DraggableInterface)temp;
+        }
         
         //if not null, that means this is a class pane
         if(draggableClass!=null){
             
             //fxcollections lets us convert from ArrayList to ObservableList
             variableTable.setItems(FXCollections.observableArrayList
-        (draggableClass.getVariableList()));
+                (draggableClass.getVariableList()));
         
             methodTable.setItems(FXCollections.observableArrayList
-        (draggableClass.getMethodList()));
+                (draggableClass.getMethodList()));
             
+        }
+        
+        else{
+            variableTable.setItems(FXCollections.observableArrayList
+                (draggableInterface.getVariableList()));
+        
+            methodTable.setItems(FXCollections.observableArrayList
+                (draggableInterface.getMethodList()));
         }
         
         variableTable.setEditable(true);
@@ -975,13 +1056,13 @@ public class Workspace extends AppWorkspaceComponent{
             Label tempLabel;
             
             DraggableClass tempDraggableClass = null;
-            //DraggableInterface draggableInterface;
+            DraggableInterface tempDraggableInterface = null;
         
             if(temp instanceof DraggableClass){
                 tempDraggableClass = (DraggableClass)temp;
             }
             else{
-                //TODO - interface!
+                tempDraggableInterface = (DraggableInterface)temp;
             }
             
             if(tempDraggableClass != null){
@@ -996,7 +1077,19 @@ public class Workspace extends AppWorkspaceComponent{
                 
                 variableBox.getChildren().set(currentVarPosition, tempLabel);
             }
-           //interface later  
+            else{
+                //update var and replace label w/ new toString
+                tempVar = tempDraggableInterface.getVar(currentVarPosition);
+                tempVar.setName(t.getNewValue());
+                tempLabel = tempDraggableInterface.getVarLabel
+                    (currentVarPosition);
+                tempLabel.setText(tempVar.toString());
+                tempDraggableInterface.setVariable(currentVarPosition,tempVar);
+                tempDraggableInterface.setVariableLabel(currentVarPosition,
+                        tempLabel);
+                
+                variableBox.getChildren().set(currentVarPosition, tempLabel);
+            }  
         });
         
         secondVC.setCellFactory(TextFieldTableCell.<Var>forTableColumn());
@@ -1011,13 +1104,13 @@ public class Workspace extends AppWorkspaceComponent{
             Label tempLabel;
             
             DraggableClass tempDraggableClass = null;
-            //DraggableInterface draggableInterface;
+            DraggableInterface tempDraggableInterface = null;
         
             if(temp instanceof DraggableClass){
                 tempDraggableClass = (DraggableClass)temp;
             }
             else{
-                //interface
+                tempDraggableInterface = (DraggableInterface)temp;
             }
             
             if(tempDraggableClass!=null){
@@ -1028,7 +1121,7 @@ public class Workspace extends AppWorkspaceComponent{
                 
                 tempDraggableClass.setVariable(currentVarPosition,tempVar);
                 tempDraggableClass.setVariableLabel(currentVarPosition,
-                        tempLabel);
+                    tempLabel);
                 variableBox.getChildren().set(currentVarPosition, tempLabel);
                 
                 //if the type isn't primitive, we need to add an API and pane 
@@ -1064,6 +1157,52 @@ public class Workspace extends AppWorkspaceComponent{
                 }
                 
             }
+            
+            else{
+                tempVar = tempDraggableInterface.getVar(currentVarPosition);
+                tempVar.setType(t.getNewValue());
+                tempLabel = tempDraggableInterface.getVarLabel
+                    (currentVarPosition);
+                tempLabel.setText(tempVar.toString());
+                
+                tempDraggableInterface.setVariable(currentVarPosition,tempVar);
+                tempDraggableInterface.setVariableLabel(currentVarPosition,
+                    tempLabel);
+                variableBox.getChildren().set(currentVarPosition, tempLabel);
+                
+                if(!primitives.contains(t.getNewValue())){
+                    if(!tempDraggableInterface.hasAPIPane()){
+                        addAPIPane(sp, tempDraggableInterface, t.getNewValue());
+                    }
+                    
+                    else{
+                        
+                        //if the class already has an APIPane, we should check 
+                        //and see if this data type is already included in that 
+                        //pane. If so, we won't add anything to the pane.
+                        StackPane apiPane = tempDraggableInterface.getAPIPane();
+                        VBox tempVBox = (VBox)apiPane.getChildren().get(1);
+                        boolean found = false;
+                        for(Object o: tempVBox.getChildren()){
+                            Label l = (Label)o;
+                            String currentAPI = l.getText();
+                            if(currentAPI.equals(t.getNewValue())){
+                                found=true;
+                                break;
+                            }
+                        }
+                        
+                        //if the new variable type isn't primitive and isn't one
+                        //of the listed APIs for this class
+                        if(!found){
+                            addAPI(tempDraggableInterface, t.getNewValue());
+                        }
+                        
+                    }
+                    
+                }
+                
+            }
         });
         
         //forces column to be checkbox, which is most intuitve for user
@@ -1080,8 +1219,12 @@ public class Workspace extends AppWorkspaceComponent{
                     cellValue.setIsStatic(newValue));
      
             DraggableClass tempDraggableClass = null;
+            DraggableInterface tempDraggableInterface = null;
             if(temp instanceof DraggableClass){
                 tempDraggableClass = (DraggableClass)temp;
+            }
+            else{
+                tempDraggableInterface = (DraggableInterface)temp;
             }
             
             if(tempDraggableClass!=null){
@@ -1103,6 +1246,19 @@ public class Workspace extends AppWorkspaceComponent{
                     variableBox.getChildren().set(i, l);
                 }
             }
+            
+            else{
+                int i=0;
+                Label l;
+                
+                
+                for(i=0;i<variableBox.getChildren().size();i++){
+                    l = new Label(tempDraggableInterface.getVar(i).toString());
+                    l.getStyleClass().add("uml_label");
+                    tempDraggableInterface.setVariableLabel(i,l);
+                    variableBox.getChildren().set(i, l);
+                }
+            }
             return property;
         });
                    
@@ -1115,13 +1271,13 @@ public class Workspace extends AppWorkspaceComponent{
             Label tempLabel;
             
             DraggableClass tempDraggableClass = null;
-            //DraggableInterface draggableInterface;
+            DraggableInterface tempDraggableInterface = null;
         
             if(temp instanceof DraggableClass){
                 tempDraggableClass = (DraggableClass)temp;
             }
             else{
-                //interface
+                tempDraggableInterface = (DraggableInterface)temp;
             }
             
             if(tempDraggableClass!=null){
@@ -1132,6 +1288,19 @@ public class Workspace extends AppWorkspaceComponent{
                 
                 tempDraggableClass.setVariable(currentVarPosition,tempVar);
                 tempDraggableClass.setVariableLabel(currentVarPosition,
+                        tempLabel);
+                variableBox.getChildren().set(currentVarPosition, tempLabel);
+            }
+            
+            else{
+                tempVar = tempDraggableInterface.getVar(currentVarPosition);
+                tempVar.setVisibility(t.getNewValue());
+                tempLabel = tempDraggableInterface.getVarLabel
+                    (currentVarPosition);
+                tempLabel.setText(tempVar.toString());
+                
+                tempDraggableInterface.setVariable(currentVarPosition,tempVar);
+                tempDraggableInterface.setVariableLabel(currentVarPosition,
                         tempLabel);
                 variableBox.getChildren().set(currentVarPosition, tempLabel);
             }
@@ -1151,8 +1320,12 @@ public class Workspace extends AppWorkspaceComponent{
                     cellValue.setIsFinal(newValue));
       
             DraggableClass tempDraggableClass = null;
+            DraggableInterface tempDraggableInterface = null;
             if(temp instanceof DraggableClass){
                 tempDraggableClass = (DraggableClass)temp;
+            }
+            else{
+                tempDraggableInterface = (DraggableInterface)temp;
             }
             
             if(tempDraggableClass!=null){
@@ -1164,6 +1337,18 @@ public class Workspace extends AppWorkspaceComponent{
                     l = new Label(tempDraggableClass.getVar(i).toString());
                     l.getStyleClass().add("uml_label");
                     tempDraggableClass.setVariableLabel(i,l);
+                    variableBox.getChildren().set(i, l);
+                }
+            }
+            
+            else{
+                int i=0;
+                Label l;
+                
+                for(i=0;i<variableBox.getChildren().size();i++){
+                    l = new Label(tempDraggableInterface.getVar(i).toString());
+                    l.getStyleClass().add("uml_label");
+                    tempDraggableInterface.setVariableLabel(i,l);
                     variableBox.getChildren().set(i, l);
                 }
             }
@@ -1187,13 +1372,13 @@ public class Workspace extends AppWorkspaceComponent{
             Label tempLabel;
             
             DraggableClass tempDraggableClass = null;
-            //DraggableInterface draggableInterface;
+            DraggableInterface tempDraggableInterface = null;
         
             if(temp instanceof DraggableClass){
                 tempDraggableClass = (DraggableClass)temp;
             }
             else{
-                //TODO - interface!
+                tempDraggableInterface = (DraggableInterface)temp;
             }
             
             if(tempDraggableClass != null){
@@ -1211,7 +1396,21 @@ public class Workspace extends AppWorkspaceComponent{
                 
                 methodBox.getChildren().set(currentMethodPosition, tempLabel);
             }
-           //interface later  
+            
+            else{
+                tempMethod = tempDraggableInterface.
+                        getMethod(currentMethodPosition);
+                tempMethod.setName(t.getNewValue());
+                
+                tempLabel = tempDraggableInterface.getMethodLabel
+                    (currentMethodPosition);
+                tempLabel.setText(tempMethod.toString());
+                tempDraggableInterface.setMethod(currentMethodPosition,tempMethod);
+                tempDraggableInterface.setMethodLabel(currentMethodPosition,
+                        tempLabel);
+                
+                methodBox.getChildren().set(currentMethodPosition, tempLabel);
+            }
         });
         
         //method return type
@@ -1221,13 +1420,13 @@ public class Workspace extends AppWorkspaceComponent{
             Label tempLabel;
             
             DraggableClass tempDraggableClass = null;
-            //DraggableInterface draggableInterface;
+            DraggableInterface tempDraggableInterface = null;
         
             if(temp instanceof DraggableClass){
                 tempDraggableClass = (DraggableClass)temp;
             }
             else{
-                //TODO - interface!
+                tempDraggableInterface = (DraggableInterface)temp;
             }
             
             if(tempDraggableClass != null){
@@ -1279,7 +1478,55 @@ public class Workspace extends AppWorkspaceComponent{
                 }
                 
             }
-           //interface later  
+            
+            else{
+                //update method and replace label w/ new toString
+                tempMethod = tempDraggableInterface.
+                        getMethod(currentMethodPosition);
+                tempMethod.setReturnType(t.getNewValue());
+                
+                tempLabel = tempDraggableInterface.getMethodLabel
+                    (currentMethodPosition);
+                tempLabel.setText(tempMethod.toString());
+                tempDraggableInterface.setMethod(currentMethodPosition,
+                    tempMethod);
+                tempDraggableInterface.setMethodLabel(currentMethodPosition,
+                    tempLabel);
+                
+                methodBox.getChildren().set(currentMethodPosition, tempLabel);
+                
+                if(!primitives.contains(t.getNewValue())){
+                    if(!tempDraggableInterface.hasAPIPane()){
+                        addAPIPane(sp, tempDraggableInterface, t.getNewValue());
+                    }
+                    
+                    else{
+                        
+                        //if the class already has an APIPane, we should check 
+                        //and see if this data type is already included in that 
+                        //pane. If so, we won't add anything to the pane.
+                        StackPane apiPane = tempDraggableInterface.getAPIPane();
+                        VBox tempVBox = (VBox)apiPane.getChildren().get(1);
+                        boolean found = false;
+                        for(Object o: tempVBox.getChildren()){
+                            Label l = (Label)o;
+                            String currentAPI = l.getText();
+                            if(currentAPI.equals(t.getNewValue())){
+                                found=true;
+                                break;
+                            }
+                        }
+                        
+                        //if the new return type isn't primitive and isn't one
+                        //of the listed APIs for this interface
+                        if(!found){
+                            addAPI(tempDraggableInterface, t.getNewValue());
+                        }
+                        
+                    }
+                }
+            }
+           
         });
         
         //static - checkbox
@@ -1295,8 +1542,12 @@ public class Workspace extends AppWorkspaceComponent{
                     cellValue.setIsStatic(newValue));
 
             DraggableClass tempDraggableClass = null;
+            DraggableInterface tempDraggableInterface = null;
             if(temp instanceof DraggableClass){
                 tempDraggableClass = (DraggableClass)temp;
+            }
+            else{
+                tempDraggableInterface = (DraggableInterface)temp;
             }
             
             if(tempDraggableClass!=null){
@@ -1311,6 +1562,19 @@ public class Workspace extends AppWorkspaceComponent{
                     methodBox.getChildren().set(i, l);
                 }
             }
+            
+            else{
+                int i=0;
+                Label l;
+                
+                for(i=0;i<methodBox.getChildren().size();i++){
+                    l = new Label(tempDraggableInterface.getMethod(i).toString());
+                    l.getStyleClass().add("uml_label");
+                    tempDraggableInterface.setMethodLabel(i,l);
+                    methodBox.getChildren().set(i, l);
+                }
+            }
+            
             return property;
         });
         
@@ -1327,8 +1591,12 @@ public class Workspace extends AppWorkspaceComponent{
                     cellValue.setIsStatic(newValue));
             
             DraggableClass tempDraggableClass = null;
+            DraggableInterface tempDraggableInterface = null;
             if(temp instanceof DraggableClass){
                 tempDraggableClass = (DraggableClass)temp;
+            }
+            else{
+                tempDraggableInterface = (DraggableInterface)temp;
             }
             
             if(tempDraggableClass!=null){
@@ -1343,6 +1611,18 @@ public class Workspace extends AppWorkspaceComponent{
                     methodBox.getChildren().set(i, l);
                 }
             }
+            
+            else{
+                int i=0;
+                Label l;
+                
+                for(i=0;i<methodBox.getChildren().size();i++){
+                    l = new Label(tempDraggableInterface.getMethod(i).toString());
+                    l.getStyleClass().add("uml_label");
+                    tempDraggableInterface.setMethodLabel(i,l);
+                    methodBox.getChildren().set(i, l);
+                }
+            }
             return property;
         });
         
@@ -1353,13 +1633,13 @@ public class Workspace extends AppWorkspaceComponent{
             Label tempLabel;
             
             DraggableClass tempDraggableClass = null;
-            //DraggableInterface draggableInterface;
+            DraggableInterface tempDraggableInterface = null;
         
             if(temp instanceof DraggableClass){
                 tempDraggableClass = (DraggableClass)temp;
             }
             else{
-                //TODO - interface!
+                tempDraggableInterface = (DraggableInterface)temp;
             }
             
             if(tempDraggableClass != null){
@@ -1377,7 +1657,22 @@ public class Workspace extends AppWorkspaceComponent{
                 
                 methodBox.getChildren().set(currentMethodPosition, tempLabel);
             }
-           //interface later  
+            
+            else{
+                //update method and replace label w/ new toString
+                tempMethod = tempDraggableInterface.
+                        getMethod(currentMethodPosition);
+                tempMethod.setVisibility(t.getNewValue());
+                
+                tempLabel = tempDraggableInterface.getMethodLabel
+                    (currentMethodPosition);
+                tempLabel.setText(tempMethod.toString());
+                tempDraggableInterface.setMethod(currentMethodPosition,tempMethod);
+                tempDraggableInterface.setMethodLabel(currentMethodPosition,
+                        tempLabel);
+                
+                methodBox.getChildren().set(currentMethodPosition, tempLabel);
+            }
         });
         
         //We'll let the user add as many arguments as they want, and expand the 
@@ -1432,8 +1727,12 @@ public class Workspace extends AppWorkspaceComponent{
                         
                         tempMethodList.set(methodPosition,l);
                         DraggableClass tempDraggableClass = null;
+                        DraggableInterface tempDraggableInterface = null;
                         if(temp instanceof DraggableClass){
                             tempDraggableClass = (DraggableClass)temp;
+                        }
+                        else{
+                            tempDraggableInterface = (DraggableInterface)temp;
                         }
                             
                         if(tempDraggableClass!=null){
@@ -1479,10 +1778,52 @@ public class Workspace extends AppWorkspaceComponent{
                                 }
                             }
                         }
-                        //interface...
                         
+                        else{
+                            tempDraggableInterface.setMethod(methodPosition, 
+                                tempMethod);
+                            tempDraggableInterface.setMethodLabel(methodPosition
+                                ,l);
+                            
+                            if(!primitives.contains(t.getNewValue())){
+                                if(!tempDraggableInterface.hasAPIPane()){
+                                    addAPIPane(sp, tempDraggableInterface, 
+                                        t.getNewValue());
+                                }
+                                
+                                else{
                         
-                    
+                                    //if the class already has an APIPane, we 
+                                    //should check and see if this data type is 
+                                    //already included in that pane. If so, we 
+                                    //won't add anything to the pane.
+                                    StackPane apiPane = tempDraggableInterface
+                                            .getAPIPane();
+                                    VBox tempVBox = (VBox)apiPane.getChildren()
+                                            .get(1);
+                                    boolean found = false;
+                                    for(Object o: tempVBox.getChildren()){
+                                        Label tempLabel = (Label)o;
+                                        String currentAPI = tempLabel.getText();
+                                        if(currentAPI.equals(t.getNewValue())){
+                                            found=true;
+                                            break;
+                                        }
+                                    }
+                        
+                                    //if the new method arg type isn't primitive 
+                                    //and isn't one of the listed APIs for this 
+                                    //interface
+                                    if(!found){
+                                        addAPI(tempDraggableInterface, 
+                                            t.getNewValue());
+                                    }
+                        
+                                }
+                                
+                            }
+                        }
+
                     });
 
                     methodTable.getColumns().add(newTableColumn);
@@ -1558,7 +1899,12 @@ public class Workspace extends AppWorkspaceComponent{
         
         //updates right side with current class's name
         Label classLabel = (Label)classBox.getChildren().get(0);
-        classTextField.setText(classLabel.getText());
+        
+        //remove the arrows - not a part of the name of an interface, just 
+        //something to indicate to the user at a glance that a pane is an 
+        //interface
+        classTextField.setText(classLabel.getText().replaceAll("<<","").
+                replaceAll(">>",""));
         
         //display a drop-down list of all potential parents. Note that as per 
         //the original design reqruirement, classes can have multiple parents, 
@@ -1767,6 +2113,39 @@ public class Workspace extends AppWorkspaceComponent{
             
         }
         
+        else{
+            DraggableInterface di = (DraggableInterface)draggable;
+            
+            //handles api movement
+            if(di.hasAPIPane()){
+                StackPane tempPane = di.getAPIPane();
+                Line tempLine = di.getAPILine();
+                tempPane.setLayoutX(sp.getLayoutX()-75);
+                tempPane.setLayoutY(sp.getLayoutY()+sp.getHeight()/2.0
+                        -tempLine.getStrokeWidth());
+                
+                tempLine.setStartX(sp.getLayoutX()-50);
+                tempLine.setStartY(sp.getLayoutY()+sp.getHeight()/2.0);
+                tempLine.setEndX(sp.getLayoutX());
+                tempLine.setEndY(sp.getLayoutY()+sp.getHeight()/2.0);
+            }
+            
+            //handle if the pane has a parent
+            if(di.hasParent()){
+                di.getParentLine().setStartX(sp.getLayoutX()+sp.getWidth()/2.0);
+                di.getParentLine().setStartY(sp.getLayoutY());
+            }
+            
+            //handle if the pane has a child
+            if(di.hasChild()){
+                StackPane childPane = di.getChildPane();
+                DraggableClass child = (DraggableClass)
+                        childPane.getChildren().get(0);
+                child.getParentLine().setEndX(sp.getLayoutX()+sp.getWidth()/2.0);
+                child.getParentLine().setEndY(sp.getLayoutY()+sp.getHeight());
+            }
+        }
+        
     }
 
 
@@ -1922,6 +2301,70 @@ public class Workspace extends AppWorkspaceComponent{
         Label l = new Label(api);
         l.getStyleClass().add("uml_label");
         VBox tempVBox = (VBox)dc.getAPIPane().getChildren().get(1);
+        tempVBox.getChildren().add(l);
+    }
+    
+    /**
+     * Adds an api pane to the given interface
+     * 
+     * @param sp
+     * The pane containing the interface
+     * 
+     * @param di
+     * The interface itself
+     * 
+     * @param api 
+     * The first external library that's added to the new api pane
+     */
+    public void addAPIPane(StackPane sp, DraggableInterface di, String api){
+        
+        //need to add a line as well as a pane
+        Line l = new Line(sp.getLayoutX()-50,sp.getLayoutY()+sp.getHeight()/2.0,
+                sp.getLayoutX(),sp.getLayoutY()+sp.getHeight()/2.0);
+        
+        //make line visible to user
+        workspace.getChildren().add(l);
+        
+        //add reference for later
+        di.setAPILine(l);
+        
+        //now create pane and everything inside of it
+        StackPane apiPane = new StackPane();
+        apiPane.getStyleClass().add("api_stack_pane");
+        Rectangle r = new Rectangle(50,30);
+        r.setFill(Color.WHITE);
+        VBox apiVBox = new VBox();
+        apiVBox.getStyleClass().add("rect_vbox");
+        Label apiLabel = new Label(api);
+        apiLabel.getStyleClass().add("uml_label");
+        apiVBox.getChildren().add(apiLabel);
+        apiPane.getChildren().addAll(r,apiVBox);
+        
+        //position properly
+        apiPane.setLayoutX(sp.getLayoutX()-75);
+        apiPane.setLayoutY(sp.getLayoutY()+sp.getHeight()/2.0
+                -l.getStrokeWidth());
+        
+        //make visible to user
+        workspace.getChildren().add(apiPane);
+        
+        //reference for later
+        di.setAPIPane(apiPane);
+    }
+    
+    /**
+     * Adds another library to the interface's api pane
+     * 
+     * @param di
+     * The interface that is using the external library
+     * 
+     * @param api 
+     * The external library's name
+     */
+    public void addAPI(DraggableInterface di, String api){
+        Label l = new Label(api);
+        l.getStyleClass().add("uml_label");
+        VBox tempVBox = (VBox)di.getAPIPane().getChildren().get(1);
         tempVBox.getChildren().add(l);
     }
     

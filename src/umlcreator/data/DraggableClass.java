@@ -3,11 +3,9 @@ package umlcreator.data;
 
 import java.util.ArrayList;
 import javafx.scene.control.Label;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import static umlcreator.data.UMLCreatorState.STARTING_CLASS;
@@ -146,7 +144,8 @@ public class DraggableClass extends Rectangle implements Draggable{
     }
 
     @Override
-    public void setLocationAndSize(double initX, double initY, double initWidth, double initHeight) {
+    public void setLocationAndSize(double initX, double initY, double initWidth,
+            double initHeight) {
         xProperty().set(initX);
 	yProperty().set(initY);
 	widthProperty().set(initWidth);

@@ -16,6 +16,7 @@ import saf.AppTemplate;
 import saf.components.AppDataComponent;
 import static umlcreator.data.UMLCreatorState.SELECTING_PANE;
 import static umlcreator.data.UMLCreatorState.STARTING_CLASS;
+import static umlcreator.data.UMLCreatorState.STARTING_INTERFACE;
 import umlcreator.gui.Workspace;
 
 /**
@@ -40,6 +41,7 @@ public class DataManager implements AppDataComponent{
     public static final String DEFAULT_PACKAGE_NAME = "dummy.package";
     public static final String DEFAULT_PARENT_VALUE = "dummyParent";
     public static final String DEFAULT_CLASS_NAME = "dummyClass";
+    public static final String DEFAULT_INTERFACE_NAME = "dummyInterface";
 
     private ArrayList<StackPane> panes;
     
@@ -74,6 +76,46 @@ public class DataManager implements AppDataComponent{
     @Override
     public void reset() {
 
+    }
+    
+    /**
+     * Creates a new interface, with a default name of dummyInterface
+     */
+    public void addNewInterface(){
+        DraggableInterface newInterface = new DraggableInterface();
+        
+        newInterface.start(100,100);
+        StackPane stackPane = new StackPane();
+        stackPane.setMinWidth(100);
+        stackPane.setMinHeight(100);
+        
+        //add the default class name 
+        Label nameLabel = new Label("<<dummyInterface>>");
+        nameLabel.getStyleClass().add("uml_label");
+        newInterface.setNameLabel(nameLabel);
+        newInterface.setNameString("dummyInterface");
+        
+        //store label in field to change later if necessary, and add styling
+        newInterface.getNameBox().getChildren().add(nameLabel);
+        newInterface.getNameBox().getStyleClass().add("rect_vbox");
+        newInterface.getNameBox().setMinHeight(newInterface.getHeight()/3.0);
+        
+        //apply stlying and size restrictions on the method and variable areas
+        newInterface.getMethodBox().setMinHeight(newInterface.getHeight()/3.0);
+        newInterface.getMethodBox().getStyleClass().add("rect_vbox");
+        newInterface.getVarBox().getStyleClass().add("rect_vbox");
+        newInterface.getVarBox().setMinHeight(newInterface.getHeight()/3.0);
+        
+        //place all of the parts into an HBox to display in top-down order
+        newInterface.getHolderBox().getChildren().addAll(
+                newInterface.getNameBox(),newInterface.getVarBox(),
+                newInterface.getMethodBox());
+        
+        //want the UMLs as stackPanes so they can overlap
+        stackPane.getChildren().addAll(newInterface,newInterface.getHolderBox());
+        
+        initNewInterface(stackPane);
+        setSelectedPane(stackPane);
     }
 
     /**
@@ -178,6 +220,32 @@ public class DataManager implements AppDataComponent{
         workspace.addPaneToWorkspace(newClass);
         
         
+    }
+    
+    /**
+     * Deals with the addition of a new interface in the workspace
+     * 
+     * @param newInterface 
+     * The interface & pane that will be added
+     */
+    public void initNewInterface(StackPane newInterface){
+       if(selectedPane!=null){
+            unhighlightPane();
+        }
+        
+        Workspace workspace = (Workspace)app.getWorkspaceComponent();
+	
+        //change state
+        state=STARTING_INTERFACE;
+        
+        //update the editing section with the default values 
+        workspace.setClassTextField(DEFAULT_INTERFACE_NAME);
+        workspace.setPackageTextField(DEFAULT_PACKAGE_NAME);
+        workspace.setParentComboBox(DEFAULT_PARENT_VALUE);
+        
+        
+        workspace.addPaneToWorkspace(newInterface);
+         
     }
     
     /**
