@@ -73,7 +73,7 @@ public class Workspace extends AppWorkspaceComponent{
     
     TextField classTextField, packageTextField;
         
-    ComboBox parentComboBox;
+    ComboBox parentComboBox, interfaceComboBox;
     
     GridPane designRenderer, componentToolbar;
     
@@ -83,9 +83,11 @@ public class Workspace extends AppWorkspaceComponent{
     DataManager dataManager;
     EditController editController;
     
-    Label methodLabel, classNameLabel, packageLabel, varLabel, parentLabel;  
+    Label methodLabel, classNameLabel, packageLabel, varLabel, parentLabel, 
+        interfaceLabel;  
     
-    HBox workspaceHBox, varHBox, methodHBox, classHBox, packageHBox, parentHBox;
+    HBox workspaceHBox, varHBox, methodHBox, classHBox, packageHBox, parentHBox,
+        interfaceHBox;
     
     ScrollPane designRendererScrollPane, methodScrollPane, varScrollPane;
 
@@ -609,47 +611,40 @@ public class Workspace extends AppWorkspaceComponent{
         setUpVarSection();
         setUpClassSection();
         setUpPackageSection();
-        setUpParentSection();
+        setUpParentAndInterfaceSection();
         
         //below we work on properly spacing each element of the editing section
         
-        //this was from my original work, and the magic numbers were to get a 
-        //close approximation to the visual aid provided to us. These nubmers 
-        //may change to more meaningful variables.
-        RowConstraints r0 = new RowConstraints();
-        r0.setPercentHeight(2);
-        RowConstraints r1 = new RowConstraints();
-        r1.setPercentHeight(10);
-        RowConstraints r2 = new RowConstraints();
-        r2.setPercentHeight(7);
-        RowConstraints r3 = new RowConstraints();
-        r3.setPercentHeight(7);
-        RowConstraints r4 = new RowConstraints();
-        r4.setPercentHeight(5);
-        RowConstraints r5 = new RowConstraints();
-        r5.setPercentHeight(20);
-        RowConstraints r6 = new RowConstraints();
-        r6.setPercentHeight(10);
-        RowConstraints r7 = new RowConstraints();
-        r7.setPercentHeight(20);
+        
+        RowConstraints topBuffer = new RowConstraints();
+        topBuffer.setPercentHeight(2);
+        
+        RowConstraints normalRC = new RowConstraints();
+        normalRC.setPercentHeight(7);
+        RowConstraints tableRC = new RowConstraints();
+        tableRC.setPercentHeight(20);
+        
         
         //adding the sections from top to bottom of the screen in the designated
         //order
-        componentToolbar.getRowConstraints().addAll(r0,r1,r2,r3,r4,r5,r0,r6,r7);
+        componentToolbar.getRowConstraints().addAll(topBuffer,normalRC,normalRC,
+                normalRC,normalRC,normalRC,tableRC,normalRC,tableRC);
         componentToolbar.add(classHBox, 0, 1);
         componentToolbar.add(packageHBox, 0, 2);
         componentToolbar.add(parentHBox, 0, 3);
-        componentToolbar.add(varHBox, 0, 4);
-        componentToolbar.add(varScrollPane, 0,5);
+        componentToolbar.add(interfaceHBox, 0, 4);
+        componentToolbar.add(varHBox, 0, 5);
+        componentToolbar.add(varScrollPane, 0,6);
         componentToolbar.add(methodHBox, 0, 7);
         componentToolbar.add(methodScrollPane, 0, 8);
         
         //insets were used to help with spacing, and applied to each HBox
-        Insets spacing = new Insets(0,0,0,10);
+        Insets spacing = new Insets(5,0,0,10);
         
         componentToolbar.setMargin(classHBox,spacing);
         componentToolbar.setMargin(packageHBox, spacing);
         componentToolbar.setMargin(parentHBox, spacing);
+        componentToolbar.setMargin(interfaceHBox, spacing);
         componentToolbar.setMargin(varHBox, spacing);
         componentToolbar.setMargin(varScrollPane, spacing);
         componentToolbar.setMargin(methodHBox, spacing);
@@ -663,14 +658,14 @@ public class Workspace extends AppWorkspaceComponent{
     private void setUpClassSection(){
         
         //setting up HBox to hold all elements
-        classHBox = new HBox(35);
+        classHBox = new HBox(87);
         
         //clearly labeling class section for user
-        classNameLabel = new Label("Class Name:");
+        classNameLabel = new Label("Name:");
         
         //initalizing text fields for user input with default prompt text
         classTextField = new TextField();
-        classTextField.setPromptText("Class");
+        classTextField.setPromptText("Name");
         
         //adding all elements to HBox
         classHBox.getChildren().addAll(classNameLabel, classTextField);
@@ -701,10 +696,10 @@ public class Workspace extends AppWorkspaceComponent{
     }
     
     /**
-     * Helper method for setting up the parent editing section of the right side
-     * of the screen
+     * Helper method for setting up the parent and interface editing section of 
+     * the right side of the screen
      */
-    private void setUpParentSection(){
+    private void setUpParentAndInterfaceSection(){
         
         //HBox to hold all elements
         parentHBox = new HBox(80);
@@ -721,6 +716,15 @@ public class Workspace extends AppWorkspaceComponent{
         
         //adding all elements
         parentHBox.getChildren().addAll(parentLabel, parentComboBox);
+        
+        interfaceHBox = new HBox(30);
+        interfaceLabel = new Label("Implements:");
+        
+        interfaceComboBox = new ComboBox();
+        interfaceComboBox.setValue("");
+        interfaceComboBox.setEditable(true);
+        
+        interfaceHBox.getChildren().addAll(interfaceLabel,interfaceComboBox);
     }
     
     /**
@@ -1880,9 +1884,12 @@ public class Workspace extends AppWorkspaceComponent{
                 StackPane localPane = dataManager.getSelectedPane();
                 Draggable drag = (Draggable)localPane.getChildren().get(0);
                 DraggableClass tempDraggableClass = null;
-                //interface
+                DraggableInterface tempDraggableInterface = null;
                 if(drag instanceof DraggableClass){
                     tempDraggableClass = (DraggableClass)drag;
+                }
+                else{
+                    tempDraggableInterface = (DraggableInterface)drag;
                 }
                 
                 if(tempDraggableClass!=null){
@@ -1890,7 +1897,17 @@ public class Workspace extends AppWorkspaceComponent{
                     Label newNameLabel = new Label(newValue);
                     newNameLabel.getStyleClass().add("uml_label");
                     tempDraggableClass.setNameLabel(newNameLabel);
-                    tempDraggableClass.getNameBox().getChildren().set(0,newNameLabel);
+                    tempDraggableClass.getNameBox().getChildren().set(0,
+                        newNameLabel);
+                }
+                
+                else{
+                    tempDraggableInterface.setNameString(newValue);
+                    Label newNameLabel = new Label("<<" + newValue + ">>");
+                    newNameLabel.getStyleClass().add("uml_label");
+                    tempDraggableInterface.setNameLabel(newNameLabel);
+                    tempDraggableInterface.getNameBox().getChildren().set(0,
+                            newNameLabel);
                 }
             }
             
@@ -1906,22 +1923,63 @@ public class Workspace extends AppWorkspaceComponent{
         classTextField.setText(classLabel.getText().replaceAll("<<","").
                 replaceAll(">>",""));
         
+        
+        
+       
+        
         //display a drop-down list of all potential parents. Note that as per 
         //the original design reqruirement, classes can have multiple parents, 
         //there is no way to remove inheritance, and interface are not inherited
         //(or extended) but are implemented.
         ArrayList<String> potentialParents = new ArrayList();
-        for(Pane p: userMadePanes){
+        for(StackPane p: userMadePanes){
+            Draggable tempDrag = (Draggable)p.getChildren().get(0);
             VBox tempHolder = (VBox)p.getChildren().get(1);
             VBox nameHolder = (VBox)tempHolder.getChildren().get(0);
             Label tempNameLabel = (Label)nameHolder.getChildren().get(0);
             String tempName = tempNameLabel.getText();
             
+            //determine if pane in loop is an interface or class
+            DraggableInterface di = null;
+            DraggableClass dc = null;
+            if(tempDrag instanceof DraggableClass){
+                dc = (DraggableClass)tempDrag;
+            }
+            else{
+                di = (DraggableInterface)tempDrag;
+            }
+            
+            //if selected pane is a class
             if(draggableClass != null){
                 
+                //Java rules:
+                //classes can only extend 1 class at a time
+                //classes cannot extend an interface
                 //you cannot be your own parent.
-                if(!draggableClass.getNameLabel().getText().equals(tempName)){
+                
+                //if the intended parent isn't named the same as the child, and 
+                //the intended parent isn't an interface
+                if(!draggableClass.getNameLabel().getText().equals(tempName) && 
+                    di==null){
                     potentialParents.add(tempName);
+                }
+            }
+            
+            //otherwise, selected pane is an interface
+            else{
+                
+                //Java rules:
+                //interfaces can extend multiple interfaces, but can't extend a 
+                //class
+                //interfaces cannot implements other interfaces
+                
+                //if the parent interface doesn't have the same name, and the 
+                //parent isn't actually a class
+                if(!draggableInterface.getNameLabel().getText().equals(tempName)
+                    && dc == null){
+                    tempName = tempName.replaceAll("<<", "");
+                    tempName = tempName.replaceAll(">>","");
+                    potentialParents.add(tempName);  
                 }
             }
             
@@ -1953,9 +2011,12 @@ public class Workspace extends AppWorkspaceComponent{
                     StackPane localPane = dataManager.getSelectedPane();
                     Draggable drag = (Draggable)localPane.getChildren().get(0);
                     DraggableClass tempDraggableClass = null;
-                    //interface
+                    DraggableInterface tempDraggableInterface = null;
                     if(drag instanceof DraggableClass){
                         tempDraggableClass = (DraggableClass)drag;
+                    }
+                    else{
+                        tempDraggableInterface = (DraggableInterface)drag;
                     }
 
                     if(tempDraggableClass!=null){
@@ -2017,6 +2078,69 @@ public class Workspace extends AppWorkspaceComponent{
                             }
                         }
                         
+                    }
+                    
+                    //interface
+                    else{
+                        
+                        //update referential line if necessary
+                        if(tempDraggableInterface.hasParent()){
+                            //remove old parent line
+                            workspace.getChildren().remove(tempDraggableInterface
+                                .getParentLine());
+                            
+                            //remove reference to child
+                            DraggableInterface parent = (DraggableInterface)
+                                tempDraggableInterface.getParentPane().
+                                getChildren().get(0);
+                            
+                            parent.setChildPane(null);
+                        }
+                        
+                        
+                        //loop through all classes to get the pane for 
+                        //reference
+                        for(StackPane pane : userMadePanes){
+                            VBox tempHolder = (VBox)pane.getChildren().get(1);
+                            VBox nameHolder = (VBox)tempHolder.getChildren()
+                                .get(0);
+                            Label tempNameLabel = (Label)nameHolder.
+                                getChildren().get(0);
+                            String tempParentName = tempNameLabel.getText();
+                                
+                            
+                            if(tempParentName.equals("<<" + parentName + ">>")){
+                                    
+                                //give child references to parent
+                                tempDraggableInterface.setParentPane(pane);
+                                Line parentLine = new Line(sp.getLayoutX()+
+                                    sp.getWidth()/2.0,
+                                    sp.getLayoutY(),
+                                    pane.getLayoutX()+pane.getWidth()/2.0,
+                                    pane.getLayoutY()+pane.getHeight());
+                                workspace.getChildren().add(parentLine);
+                                tempDraggableInterface.setParentLine(parentLine);
+                                    
+                                //need to have parent reference child too 
+                                //for movement in workspace
+                                Draggable parentDraggable = (Draggable)
+                                    pane.getChildren().get(0);
+                                    
+                                DraggableInterface parentIC = null;
+                                    
+                                if(parentDraggable instanceof DraggableInterface){
+                                    parentIC = (DraggableInterface)
+                                        parentDraggable;
+                                }
+                                    
+                                if(parentIC!=null){
+                                    parentIC.setChildPane(sp);
+                                        
+                                }
+                                    
+                                break;
+                            }
+                        }
                     }
                     
                     
@@ -2139,7 +2263,7 @@ public class Workspace extends AppWorkspaceComponent{
             //handle if the pane has a child
             if(di.hasChild()){
                 StackPane childPane = di.getChildPane();
-                DraggableClass child = (DraggableClass)
+                DraggableInterface child = (DraggableInterface)
                         childPane.getChildren().get(0);
                 child.getParentLine().setEndX(sp.getLayoutX()+sp.getWidth()/2.0);
                 child.getParentLine().setEndY(sp.getLayoutY()+sp.getHeight());
