@@ -20,7 +20,7 @@ public class DraggableInterface extends Rectangle implements Draggable{
     
     private double startX, startY;
     
-    private StackPane parentPane, stackPane, apiPane, childPane;
+    private StackPane stackPane, apiPane;
     
     private Label nameLabel;
     private String nameString, packageName;
@@ -31,7 +31,11 @@ public class DraggableInterface extends Rectangle implements Draggable{
     private ArrayList<Label> methodLabelList;
     private ArrayList<Label> variableLabelList;
     
-    private Line apiLine, parentLine;
+    private Line apiLine;
+    private ArrayList<Line> parentLines;
+    private ArrayList<StackPane> parentPanes, childPanes;
+    
+    private ArrayList<StackPane> classPanes;
     
     private VBox methodBox, varBox, nameBox, holderBox;
     
@@ -65,10 +69,10 @@ public class DraggableInterface extends Rectangle implements Draggable{
         apiPane = null;
         apiLine = null;
         
-        parentPane = null;
-        parentLine = null;
-          
-        childPane = null;
+        parentLines = new ArrayList();
+        childPanes = new ArrayList();
+        parentPanes = new ArrayList();
+        classPanes = new ArrayList();
     }
 
     @Override
@@ -190,11 +194,23 @@ public class DraggableInterface extends Rectangle implements Draggable{
     }
     
     public boolean hasParent(){
-        return parentPane!=null;
+        return parentPanes.size()>0;
     }
     
     public boolean hasChild(){
-        return childPane!=null;
+        return childPanes.size()>0;
+    }
+    
+    public boolean hasClass(){
+        return classPanes.size()>0;
+    }
+    
+    public ArrayList<StackPane> getClassPanes(){
+        return classPanes;
+    }
+    
+    public void addClassPane(StackPane sp){
+        classPanes.add(sp);
     }
 
     public double getStartX() {
@@ -213,13 +229,11 @@ public class DraggableInterface extends Rectangle implements Draggable{
         this.startY = startY;
     }
 
-    public StackPane getParentPane() {
-        return parentPane;
+    public ArrayList<StackPane> getParentPanes() {
+        return parentPanes;
     }
 
-    public void setParentPane(StackPane parentPane) {
-        this.parentPane = parentPane;
-    }
+    
 
     public StackPane getStackPane() {
         return stackPane;
@@ -237,13 +251,11 @@ public class DraggableInterface extends Rectangle implements Draggable{
         this.apiPane = apiPane;
     }
 
-    public StackPane getChildPane() {
-        return childPane;
+    public ArrayList<StackPane> getChildPanes() {
+        return childPanes;
     }
 
-    public void setChildPane(StackPane childPane) {
-        this.childPane = childPane;
-    }
+    
 
     public Label getNameLabel() {
         return nameLabel;
@@ -309,13 +321,11 @@ public class DraggableInterface extends Rectangle implements Draggable{
         this.apiLine = apiLine;
     }
 
-    public Line getParentLine() {
-        return parentLine;
+    public ArrayList<Line> getParentLines() {
+        return parentLines;
     }
 
-    public void setParentLine(Line parentLine) {
-        this.parentLine = parentLine;
-    }
+    
 
     public VBox getMethodBox() {
         return methodBox;
@@ -347,6 +357,34 @@ public class DraggableInterface extends Rectangle implements Draggable{
 
     public void setHolderBox(VBox holderBox) {
         this.holderBox = holderBox;
+    }
+    
+    public void addParentPane(StackPane parent){
+        parentPanes.add(parent);
+    }
+    
+    public void addParentLine(Line l){
+        parentLines.add(l);
+    }
+    
+    public void addChildPane(StackPane child){
+        childPanes.add(child);
+    }
+    
+    public void removeChildPane(StackPane child){
+        childPanes.remove(child);
+    }
+    
+    public void removeParentLine(Line l){
+        parentLines.remove(l);
+    }
+
+    public void removeClassPane(StackPane p){
+        classPanes.remove(p);
+    }
+    
+    public void removeParentPane(StackPane sp){
+        parentPanes.remove(sp);
     }
     
 }

@@ -44,8 +44,10 @@ public class DraggableClass extends Rectangle implements Draggable{
     private StackPane parentPane;
     private Line parentLine;
     
-    private StackPane childPane;
+    private ArrayList<StackPane> childPanes;
     
+    private ArrayList<StackPane> implementPanes;
+    private ArrayList<Line> implementLines;
     
     public DraggableClass(){
         
@@ -84,7 +86,9 @@ public class DraggableClass extends Rectangle implements Draggable{
         parentPane = null;
         parentLine = null;
           
-        childPane = null;
+        childPanes = new ArrayList();
+        implementLines = new ArrayList();
+        implementPanes = new ArrayList();
     }
     
     /**
@@ -344,15 +348,51 @@ public class DraggableClass extends Rectangle implements Draggable{
     }
     
     public boolean hasChild(){
-        return childPane!=null;
+        return childPanes.size()>0;
     }
     
-    public void setChildPane(StackPane sp){
-        childPane = sp;
+    public boolean hasInterface(){
+        return implementPanes.size()>0;
     }
     
-    public StackPane getChildPane(){
-        return childPane;
+    
+    public ArrayList<StackPane> getChildPanes(){
+        return childPanes;
+    }
+    
+    public void addImplementLine(Line l){
+        implementLines.add(l);
+    }
+    
+    public void addImplementPane(StackPane sp){
+        implementPanes.add(sp);
+    }
+    
+    
+    
+    public void addChildPane(StackPane child){
+        childPanes.add(child);
+    }
+    
+    public void removeChildPane(StackPane sp){
+        childPanes.remove(sp);
+    }
+    
+    public void removeParentPane(){
+        parentPane=null;
+        parentLine = new Line();
+    }
+    
+    public ArrayList<StackPane> getImplementPanes(){
+        return implementPanes;
+    }
+    
+    public ArrayList<Line> getImplementLines(){
+        return implementLines;
+    }
+    
+    public void removeImplementPane(StackPane sp){
+        implementPanes.remove(sp);
     }
     
 }

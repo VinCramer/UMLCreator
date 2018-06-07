@@ -372,24 +372,111 @@ public class Workspace extends AppWorkspaceComponent{
                     di = (DraggableInterface)d;
                 }
                 
-                //TODO - need to remove parent-child lines if either parent or 
-                //child is removed
                 
-                //need to remove api lines and api pane if hosting 
-                //class/interface is removed
+                
+                //need to remove any additional panes or lines created by the 
+                //class or interface
                 if(dc != null){
                     if(dc.hasAPIPane()){
                         workspace.getChildren().remove(dc.getAPIPane());
                         workspace.getChildren().remove(dc.getAPILine());
                     }
+                    if(dc.hasChild()){
+                        ArrayList<StackPane> childPanes = dc.getChildPanes();
+                        for(int i=0;i<childPanes.size();i++){
+                            DraggableClass child = (DraggableClass)
+                                childPanes.get(i).getChildren().get(0);
+                            workspace.getChildren().remove(child.getParentLine());
+                            
+                            //function also removes parent line
+                            child.removeParentPane();
+                            
+                        }
+                    }
+                    if(dc.hasParent()){
+                        workspace.getChildren().remove(dc.getParentLine());
+                        StackPane parent = dc.getParentPane();
+                        DraggableClass parentClass = (DraggableClass)
+                                parent.getChildren().get(0);
+                        parentClass.removeChildPane(tempPane);
+                        workspace.getChildren().remove(dc.getParentLine());
+                    }
+                    if(dc.hasInterface()){
+                        
+                        //remove lines
+                        for(Line l:dc.getImplementLines()){
+                            workspace.getChildren().remove(l);
+                        }
+                        
+                        //remove references
+                        ArrayList<StackPane> interfaces = dc.getImplementPanes();
+                        for(int i=0;i<interfaces.size();i++){
+                            StackPane intPane = interfaces.get(i);
+                            DraggableInterface tempDI = (DraggableInterface)
+                                intPane.getChildren().get(0);
+                            tempDI.removeChildPane(tempPane);
+                        }
+                    }
+                    
+                    
                 }
                 else{
                     if(di.hasAPIPane()){
                         workspace.getChildren().remove(di.getAPILine());
                         workspace.getChildren().remove(di.getAPIPane());
                     }
+                    if(di.hasChild()){
+                        ArrayList<StackPane> childPanes = di.getChildPanes();
+                        for(int i=0;i<childPanes.size();i++){
+                        StackPane childPane=childPanes.get(i);
+                        DraggableInterface child = (DraggableInterface)
+                            childPane.getChildren().get(0);
+                    
+                        for(int j=0;j<child.getParentPanes().size();j++){
+                            StackPane parentPane = child.getParentPanes().get(j);
+                            if(parentPane.equals(tempPane)){
+                                workspace.getChildren().remove(
+                                    child.getParentLines().get(j));
+                                child.removeParentPane(tempPane);
+                                }
+                            }
+                    
+                        }
+                    }
+                    
+                    if(di.hasParent()){
+                        ArrayList<Line> parentLines = di.getParentLines();
+                        for(int i=0;i<parentLines.size();i++){
+                            Line l = parentLines.get(i);
+                            workspace.getChildren().remove(l);
+                        }
+                        ArrayList<StackPane> parentPanes = di.getParentPanes();
+                        for(int i=0;i<parentPanes.size();i++){
+                            DraggableInterface tempDI = (DraggableInterface)
+                                parentPanes.get(i).getChildren().get(0);
+                            tempDI.removeChildPane(tempPane);
+                        }
+                    }
+                    
+                    if(di.hasClass()){
+                        ArrayList<StackPane> classPanes = di.getClassPanes();
+                        for(int i=0;i<classPanes.size();i++){
+                            StackPane childPane=classPanes.get(i);
+                            DraggableClass child = (DraggableClass)
+                                childPane.getChildren().get(0);
+                    
+                        for(int j=0;j<child.getImplementPanes().size();j++){
+                            StackPane parentPane = child.getImplementPanes().get(j);
+                            if(parentPane.equals(tempPane)){
+                                workspace.getChildren().remove(
+                                    child.getImplementLines().get(j));
+                                child.removeImplementPane(tempPane);
+                                }
+                            }
+                    
+                        }
+                    }
                 }
-                
             }
         });
         
@@ -1925,7 +2012,99 @@ public class Workspace extends AppWorkspaceComponent{
         
         
         
-       
+        //create a drop down list of all potential interfaces for a class to
+        //implement
+        ArrayList<String> potentialInterfaces = new ArrayList();
+        
+        for(StackPane s: userMadePanes){
+            
+            //if the currently selected pane is an interface, it can't implement
+            //any interfaces, though it can extend interfaces
+            if(draggableInterface!=null){
+                break;
+            }
+            
+            Draggable tempDrag = (Draggable)s.getChildren().get(0);
+            VBox tempHolder = (VBox)s.getChildren().get(1);
+            VBox nameHolder = (VBox)tempHolder.getChildren().get(0);
+            Label tempNameLabel = (Label)nameHolder.getChildren().get(0);
+            String tempName = tempNameLabel.getText();
+            
+            //determine if pane in loop is an interface or class
+            DraggableInterface di = null;
+            if(tempDrag instanceof DraggableInterface){
+                di = (DraggableInterface)tempDrag;
+            }
+            
+            if(di!=null){
+                tempName = tempName.replaceAll("<<", "");
+                tempName = tempName.replaceAll(">>","");
+                potentialInterfaces.add(tempName);  
+            }
+            
+        }
+        
+        interfaceComboBox.getItems().clear();
+        interfaceComboBox.getItems().addAll(potentialInterfaces);
+        
+        interfaceComboBox.setOnAction(event -> {
+            if(dataManager.isInState(SELECTING_PANE)){
+                if(interfaceComboBox.getSelectionModel()!=null && 
+                        interfaceComboBox.getSelectionModel().getSelectedItem()
+                        !=null){
+                    
+                    //note that interfaceName is without the "<<" and ">>"
+                    String interfaceName = interfaceComboBox.getSelectionModel().
+                            getSelectedItem().toString();
+                    
+                    StackPane localPane = dataManager.getSelectedPane();
+                    Draggable drag = (Draggable)localPane.getChildren().get(0);
+                    DraggableClass tempDraggableClass = null;
+                    if(drag instanceof DraggableClass){
+                        tempDraggableClass = (DraggableClass)drag;
+                    }
+                    else{
+                        //otherwise, we're selecting an interface, which cannot 
+                        //implement another interface
+                        return;
+                    }
+                    
+                    //we know that tempDC was initialized to a non-null value 
+                    //here
+                    //loop through all panes to get references to store in our 
+                    //DraggableClass and the DragableInterface
+                    for(StackPane pane : userMadePanes){
+                            VBox tempHolder = (VBox)pane.getChildren().get(1);
+                            VBox nameHolder = (VBox)tempHolder.getChildren()
+                                .get(0);
+                            Label tempNameLabel = (Label)nameHolder.
+                                getChildren().get(0);
+                            String tempInterfaceName = tempNameLabel.getText();
+                            Draggable draggable = (Draggable)
+                                pane.getChildren().get(0);
+                            if(draggable instanceof DraggableInterface){
+                                
+                                if(tempInterfaceName.equals("<<" +interfaceName 
+                                    + ">>")){
+                                    DraggableInterface tempDI = 
+                                        (DraggableInterface)draggable;
+                                    tempDI.addClassPane(sp);
+                                    Line l = new Line(sp.getLayoutX()+
+                                    sp.getWidth()/2.0,
+                                    sp.getLayoutY(),
+                                    pane.getLayoutX()+pane.getWidth()/2.0,
+                                    pane.getLayoutY()+pane.getHeight());
+                                    tempDraggableClass.addImplementLine(l);
+                                    tempDraggableClass.addImplementPane(pane);
+                                    workspace.getChildren().add(l);
+                                }
+                            }
+                            
+                    }
+                    
+                }
+            }
+        });
         
         //display a drop-down list of all potential parents. Note that as per 
         //the original design reqruirement, classes can have multiple parents, 
@@ -1985,6 +2164,8 @@ public class Workspace extends AppWorkspaceComponent{
             
         }
         
+        
+        
         //we need to clear the suggestions list, then add all of the new valid 
         //options
         parentComboBox.getItems().clear();
@@ -2032,7 +2213,7 @@ public class Workspace extends AppWorkspaceComponent{
                                 tempDraggableClass.getParentPane().
                                 getChildren().get(0);
                             
-                            parent.setChildPane(null);
+                            parent.removeChildPane(sp);
                         }
                         
                             
@@ -2070,7 +2251,7 @@ public class Workspace extends AppWorkspaceComponent{
                                 }
                                     
                                 if(parentDC!=null){
-                                    parentDC.setChildPane(sp);
+                                    parentDC.addChildPane(sp);
                                         
                                 }
                                     
@@ -2083,19 +2264,7 @@ public class Workspace extends AppWorkspaceComponent{
                     //interface
                     else{
                         
-                        //update referential line if necessary
-                        if(tempDraggableInterface.hasParent()){
-                            //remove old parent line
-                            workspace.getChildren().remove(tempDraggableInterface
-                                .getParentLine());
-                            
-                            //remove reference to child
-                            DraggableInterface parent = (DraggableInterface)
-                                tempDraggableInterface.getParentPane().
-                                getChildren().get(0);
-                            
-                            parent.setChildPane(null);
-                        }
+                        
                         
                         
                         //loop through all classes to get the pane for 
@@ -2112,14 +2281,14 @@ public class Workspace extends AppWorkspaceComponent{
                             if(tempParentName.equals("<<" + parentName + ">>")){
                                     
                                 //give child references to parent
-                                tempDraggableInterface.setParentPane(pane);
+                                tempDraggableInterface.addParentPane(pane);
                                 Line parentLine = new Line(sp.getLayoutX()+
                                     sp.getWidth()/2.0,
                                     sp.getLayoutY(),
                                     pane.getLayoutX()+pane.getWidth()/2.0,
                                     pane.getLayoutY()+pane.getHeight());
                                 workspace.getChildren().add(parentLine);
-                                tempDraggableInterface.setParentLine(parentLine);
+                                tempDraggableInterface.addParentLine(parentLine);
                                     
                                 //need to have parent reference child too 
                                 //for movement in workspace
@@ -2134,7 +2303,7 @@ public class Workspace extends AppWorkspaceComponent{
                                 }
                                     
                                 if(parentIC!=null){
-                                    parentIC.setChildPane(sp);
+                                    parentIC.addChildPane(sp);
                                         
                                 }
                                     
@@ -2228,11 +2397,25 @@ public class Workspace extends AppWorkspaceComponent{
             
             //handle if the pane has a child
             if(dc.hasChild()){
-                StackPane childPane = dc.getChildPane();
-                DraggableClass child = (DraggableClass)
-                        childPane.getChildren().get(0);
-                child.getParentLine().setEndX(sp.getLayoutX()+sp.getWidth()/2.0);
-                child.getParentLine().setEndY(sp.getLayoutY()+sp.getHeight());
+                ArrayList<StackPane> childPanes = dc.getChildPanes();
+                for(int i=0;i<childPanes.size();i++){
+                    DraggableClass child = (DraggableClass)
+                        childPanes.get(i).getChildren().get(0);
+                    child.getParentLine().setEndX(sp.getLayoutX()+
+                            sp.getWidth()/2.0);
+                    child.getParentLine().setEndY(sp.getLayoutY()+
+                            sp.getHeight());
+                }
+                
+            }
+            
+            if(dc.hasInterface()){
+                ArrayList<Line> intLines = dc.getImplementLines();
+                for(int i=0;i<intLines.size();i++){
+                    Line l = intLines.get(i);
+                    l.setStartX(sp.getLayoutX()+sp.getWidth()/2.0);
+                    l.setStartY(sp.getLayoutY());
+                }
             }
             
         }
@@ -2256,17 +2439,59 @@ public class Workspace extends AppWorkspaceComponent{
             
             //handle if the pane has a parent
             if(di.hasParent()){
-                di.getParentLine().setStartX(sp.getLayoutX()+sp.getWidth()/2.0);
-                di.getParentLine().setStartY(sp.getLayoutY());
+                ArrayList<Line> parentLines = di.getParentLines();
+                for(int i=0;i<parentLines.size();i++){
+                    Line l = parentLines.get(i);
+                    l.setStartX(sp.getLayoutX()+sp.getWidth()/2.0);
+                    l.setStartY(sp.getLayoutY());
+                }
+                
+                
             }
+            
             
             //handle if the pane has a child
             if(di.hasChild()){
-                StackPane childPane = di.getChildPane();
-                DraggableInterface child = (DraggableInterface)
+                ArrayList<StackPane> childPanes = di.getChildPanes();
+                for(int i=0;i<childPanes.size();i++){
+                    StackPane childPane=childPanes.get(i);
+                    DraggableInterface child = (DraggableInterface)
                         childPane.getChildren().get(0);
-                child.getParentLine().setEndX(sp.getLayoutX()+sp.getWidth()/2.0);
-                child.getParentLine().setEndY(sp.getLayoutY()+sp.getHeight());
+                    
+                    for(int j=0;j<child.getParentPanes().size();j++){
+                        StackPane parentPane = child.getParentPanes().get(j);
+                        if(parentPane.equals(sp)){
+                            child.getParentLines().get(j).setEndX(
+                                    sp.getLayoutX()+sp.getWidth()/2.0);
+                            child.getParentLines().get(j).setEndY(
+                                    sp.getLayoutY()+sp.getHeight());
+                        }
+                    }
+                    
+                }
+                
+                
+            }
+            
+            
+            if(di.hasClass()){
+                ArrayList<StackPane> classPanes = di.getClassPanes();
+                for(int i=0;i<classPanes.size();i++){
+                    StackPane childPane=classPanes.get(i);
+                    DraggableClass child = (DraggableClass)
+                        childPane.getChildren().get(0);
+                    
+                    for(int j=0;j<child.getImplementPanes().size();j++){
+                        StackPane parentPane = child.getImplementPanes().get(j);
+                        if(parentPane.equals(sp)){
+                            child.getImplementLines().get(j).setEndX(
+                                    sp.getLayoutX()+sp.getWidth()/2.0);
+                            child.getImplementLines().get(j).setEndY(
+                                    sp.getLayoutY()+sp.getHeight());
+                        }
+                    }
+                    
+                }
             }
         }
         
