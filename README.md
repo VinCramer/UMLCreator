@@ -5,12 +5,12 @@ Despite still having the functional original version of this project, this repos
 
 # Program functions:
 - Launching a new project
-- Adding new classes
-- Moving classes
+- Adding new classes and interfaces
+- Moving classes and interfaces, as well as their API panes and inhreitance/implementation lines
 - Toggleable grid in the background
 - Ability to snap to aforementioned grid, even if the grid is not displayed
-- Removing classes
-- Adding methods and variables to classes
+- Removing classes and interface
+- Adding methods and variables to classes and interfaces
 - Editing aspects variables and methods in classes such as the visibility and if they are static
 - Updating display depending on the currently selected class or interface
 - Removing variables and methods added by the user
@@ -21,8 +21,6 @@ Despite still having the functional original version of this project, this repos
 - Saving to a JSON file
 - Loading from a JSON file
 - Exporting UML diagram to compiling Java code
-- Adding interfaces
-- Displaying inheritance
 - Resizing classes and interfaces
 - Zooming in and out
 
@@ -30,17 +28,24 @@ Despite still having the functional original version of this project, this repos
 
 
 
-This is the new layout, with icons provided by feather.netlify (https://feather.netlify.com/):
-![umlcreator gui v1](https://user-images.githubusercontent.com/32882792/38576255-a18dbb96-3ccb-11e8-953d-7abd9564aa61.PNG)
-
-This is an an example of a how a parent-child relationship, variables, methods, and an API would be represented in my older version of this project, which may change in my final iteration:
+This is the new layout, with icons provided by feather.netlify (https://feather.netlify.com/) (updated 2018-06-07):
+![newer layout 2018-06-07](https://user-images.githubusercontent.com/32882792/41116346-0782ca04-6a58-11e8-82fd-55a84a7cf1e8.PNG)
 
 
-![219 example](https://user-images.githubusercontent.com/32882792/38476046-cb22ff1e-3b79-11e8-8712-0ac6f8973f66.PNG)
 
-
-This is an example of the newest version's layout in effect, as of 2018-06-02:
+This is an example of the grid functionality and class method/variable editing, captured on 2018-06-02:
 ![updated project 2018-06-02](https://user-images.githubusercontent.com/32882792/40878986-435cbf98-6667-11e8-93a4-711beac21414.PNG)
 
 This is how variable and method API requirements will be handled in the current version, as of 2018-06-03:
 ![updated project 2018-06-03](https://user-images.githubusercontent.com/32882792/40889319-9c0a9b44-6732-11e8-9df6-e0f167dcd293.PNG)
+
+This is an example of interfaces having the same method/variable editing functionality as classes, captured on 2018-06-07:
+![updated project 2018-06-07-2](https://user-images.githubusercontent.com/32882792/41116250-be2edb36-6a57-11e8-87e8-2c904ddef9ca.PNG)
+
+This is how inheritance and implementation is displayed, as of 2018-06-07. Note that in this example, Class A extends Class B, which extends class C. InterfaceA extends both InterfaceB and InterfaceC. Class C implements all of the interfaces shown. 
+![updated project 2018-06-07](https://user-images.githubusercontent.com/32882792/41116104-5faae348-6a57-11e8-8e8c-a19d58bad1b6.PNG)
+
+Note that the "<<" and ">>" are how UML indicates an interface, and will not be part of the itnerface's names when exported.
+
+The lines showing inheritance and implementation are the same in layout, where the child/class has the line starting from the top-center of the pane, and the other end of the line is in the bottom-middle of the parent class/interface. This is acceptable because no class can extend an interface, which removes the initial amibiguity in how it looks. This may change in the future to be more obvious.
+
