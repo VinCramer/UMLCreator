@@ -4,6 +4,7 @@ package umlcreator.gui;
 import java.util.ArrayList;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import umlcreator.file.FileManager;
 
 /**
  *
@@ -80,7 +81,7 @@ public class Method {
         }
         
         //add static symbol if necessary
-        if(isIsStatic()){
+        if(getIsStatic()){
             s+="$";
         }
         
@@ -100,7 +101,7 @@ public class Method {
         
         s+="): "+ getReturnType();
         
-        if(isIsAbstract()){
+        if(getIsAbstract()){
             s+=" {abstract}";
         }
         
@@ -131,7 +132,7 @@ public class Method {
         this.returnType = returnType;
     }
 
-    public boolean isIsStatic() {
+    public boolean getIsStatic() {
         return isStatic.get();
     }
 
@@ -139,7 +140,7 @@ public class Method {
         this.isStatic.set(isStatic);
     }
 
-    public boolean isIsAbstract() {
+    public boolean getIsAbstract() {
         return isAbstract.get();
     }
 
@@ -187,6 +188,95 @@ public class Method {
     
     public void addArgument(String newArg){
         arguments.add(newArg);
+    }
+    
+    /**
+     * Returns a formatted String which will be used by FileManager to write out
+     * a method that will compile for classes and static methods in interfaces. 
+     * This is because Java 8 implemented the ability to define the method 
+     * bodies of static methods in an interface.
+     * 
+     * @return 
+     * A formatted String of the method for classes, and for interfaces, if the 
+     * method is static
+     */
+    public String toExportStringClassAndStaticInterface(){
+        String s = "";
+        s+=visibility+" ";
+        if(isStatic.get()){
+            s+="static ";
+        }
+        if(isAbstract.get()){
+            s+="abstract ";
+        }
+        
+        s+=returnType + " " + name + "(";
+        for(int i=0;i<arguments.size();i++){
+            s+=arguments.get(i) + "arg" + i + " ";
+        }
+        
+        s+="){\n";
+        
+        if(!returnType.equals("void")){
+            //returning either primitives (or String) or non-primitives
+            s+="return ";
+            if(returnType.equals("int")){
+                s+=FileManager.DUMMY_INT + ";";
+            }
+            else if(returnType.equals("double")){
+                s+=FileManager.DUMMY_DOUBLE + ";";
+            }
+            else if(returnType.equals("boolean")){
+                s+=FileManager.DUMMY_BOOLEAN + ";";
+            }
+            else if(returnType.equals("char")){
+                s+=FileManager.DUMMY_CHAR + ";";
+            }
+            else if(returnType.equals("long")){
+                s+=FileManager.DUMMY_LONG+";";
+            }
+            else if(returnType.equals("byte")){
+                s+=FileManager.DUMMY_BYTE+";";
+            }
+            else if(returnType.equals("String")){
+                s+=FileManager.DUMMY_STRING+";";
+            }
+            
+            //non-primitives that aren't String
+            else{
+                s+="return new " + returnType + "();";
+            }
+        }
+        
+        s+="\n}\n";
+        
+        return s;
+    }
+    
+    /**
+     * Returns a formatted String for most interface methods. This includes just
+     * the method header and semicolon instead of an actual body.
+     * 
+     * @return 
+     * Formatted String of a method header for interfaces
+     */
+    public String toExportStringInterfaceAndAbstractMethod(){
+       String s = "";
+       
+       s+=visibility + " ";
+       
+       if(isAbstract.get()){
+           s+=" abstract "; 
+       }
+       
+       s+=returnType + " " + name + "(";
+        for(int i=0;i<arguments.size();i++){
+            s+=arguments.get(i) + "arg" + i + " ";
+        }
+        
+        s+=");\n";
+       
+       return s;
     }
     
 }

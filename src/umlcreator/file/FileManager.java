@@ -1,9 +1,13 @@
 
 package umlcreator.file;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import javafx.scene.layout.StackPane;
 import saf.components.AppDataComponent;
 import saf.components.AppFileComponent;
+import umlcreator.data.DataManager;
 
 /**
  *
@@ -26,22 +30,31 @@ public class FileManager implements AppFileComponent{
     public CharSequence charSequence = "char";
 
     @Override
-    public void saveData(AppDataComponent data, String filePath) throws IOException {
+    public void saveData(AppDataComponent data, String filePath) 
+            throws IOException {
         
     }
 
     @Override
-    public void loadData(AppDataComponent data, String filePath) throws IOException {
+    public void loadData(AppDataComponent data, String filePath) 
+            throws IOException {
         
     }
 
     @Override
-    public void exportData(AppDataComponent data, String filePath) throws IOException {
+    public void exportData(AppDataComponent data, String filePath) 
+            throws IOException {
+        DataManager dataManager = (DataManager)data;
+        ArrayList<StackPane> panes = dataManager.getPanes();
         
+        File file = new File(filePath);
+        file.mkdir();
+        //TODO - pick up here!
     }
 
     @Override
-    public void importData(AppDataComponent data, String filePath) throws IOException {
+    public void importData(AppDataComponent data, String filePath) 
+            throws IOException {
         
     }
     

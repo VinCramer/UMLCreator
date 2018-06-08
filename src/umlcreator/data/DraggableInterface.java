@@ -39,6 +39,7 @@ public class DraggableInterface extends Rectangle implements Draggable{
     
     private VBox methodBox, varBox, nameBox, holderBox;
     
+    private boolean isAbstract;
     
     public DraggableInterface(){
         methodBox = new VBox();
@@ -73,7 +74,10 @@ public class DraggableInterface extends Rectangle implements Draggable{
         childPanes = new ArrayList();
         parentPanes = new ArrayList();
         classPanes = new ArrayList();
+        
+        isAbstract = false;
     }
+    
 
     @Override
     public UMLCreatorState getStartingState() {
@@ -385,6 +389,63 @@ public class DraggableInterface extends Rectangle implements Draggable{
     
     public void removeParentPane(StackPane sp){
         parentPanes.remove(sp);
+    }
+    
+    public boolean getIsAbstract(){
+        return isAbstract;
+    }
+    
+    public void setIsAbstract(boolean isAbstract){
+        this.isAbstract=isAbstract;
+    }
+    
+    /**
+     * Returns a formatted String of the entire interface, including its 
+     * variables and methods
+     * 
+     * @return 
+     * A formatted String of the entire interface
+     */
+    public String toExportString(){
+        String s = "";
+        s+="public ";
+        if(nameBox.getChildren().size()==2){
+            s+="abstract ";
+        }
+        
+        s+="interface " + nameString + " ";
+        if(hasParent()){
+            s+="extends ";
+            for(StackPane sp: parentPanes){
+                DraggableInterface di = (DraggableInterface)
+                    sp.getChildren().get(0);
+                s+= di.getNameString() + ", ";
+            }
+            //remove last spacing and comma
+            s=s.substring(0,s.length()-2);
+            
+            //re-add last space
+            s+=" ";
+        }
+        
+        s+="{\n";
+        
+        for(Var v:variableList){
+            s+=v.toExportString();
+        }
+        
+        for(Method m:methodList){
+            if(m.getIsStatic()){
+                s+=m.toExportStringClassAndStaticInterface();
+            }
+            else{
+                s+=m.toExportStringInterfaceAndAbstractMethod();
+            }
+        }
+        
+        s+="}";
+        
+        return s;
     }
     
 }

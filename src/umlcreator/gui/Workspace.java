@@ -1701,6 +1701,27 @@ public class Workspace extends AppWorkspaceComponent{
                     tempDraggableClass.setMethodLabel(i,l);
                     methodBox.getChildren().set(i, l);
                 }
+                
+                //need to include label indicate class is abstract
+                
+                boolean isAbstract = false;
+                for(Method m:tempDraggableClass.getMethodList()){
+                    if(m.getIsAbstract()){
+                        isAbstract = true;
+                        break;
+                    }
+                }
+                
+                if(isAbstract && tempDraggableClass.getNameBox().getChildren().size()==1){
+                    Label newLabel = new Label("{abstract}");
+                    newLabel.getStyleClass().add("uml_label");
+                    tempDraggableClass.getNameBox().getChildren().add(newLabel);
+                }
+                
+                if(!isAbstract && tempDraggableClass.getNameBox().getChildren().size()==2){
+                    tempDraggableClass.getNameBox().getChildren().remove(1);
+                }
+                
             }
             
             else{
@@ -1712,6 +1733,26 @@ public class Workspace extends AppWorkspaceComponent{
                     l.getStyleClass().add("uml_label");
                     tempDraggableInterface.setMethodLabel(i,l);
                     methodBox.getChildren().set(i, l);
+                }
+                
+                //need to include label indicate interface is abstract
+                
+                boolean isAbstract = false;
+                for(Method m:tempDraggableInterface.getMethodList()){
+                    if(m.getIsAbstract()){
+                        isAbstract = true;
+                        break;
+                    }
+                }
+                
+                if(isAbstract && tempDraggableInterface.getNameBox().getChildren().size()==1){
+                    Label newLabel = new Label("{abstract}");
+                    newLabel.getStyleClass().add("uml_label");
+                    tempDraggableInterface.getNameBox().getChildren().add(newLabel);
+                }
+                
+                if(!isAbstract && tempDraggableInterface.getNameBox().getChildren().size()==2){
+                    tempDraggableInterface.getNameBox().getChildren().remove(1);
                 }
             }
             return property;
@@ -2716,5 +2757,6 @@ public class Workspace extends AppWorkspaceComponent{
         VBox tempVBox = (VBox)di.getAPIPane().getChildren().get(1);
         tempVBox.getChildren().add(l);
     }
+    
     
 }

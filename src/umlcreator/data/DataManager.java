@@ -11,7 +11,6 @@ import javafx.scene.effect.Effect;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
-import javafx.scene.shape.Rectangle;
 import saf.AppTemplate;
 import saf.components.AppDataComponent;
 import static umlcreator.data.UMLCreatorState.SELECTING_PANE;
@@ -368,6 +367,11 @@ public class DataManager implements AppDataComponent{
         }
         
         return null;
+    }
+    
+    public ArrayList<StackPane> getPanes(){
+        Workspace workspace = (Workspace)app.getWorkspaceComponent();
+        return workspace.getUserMadePanes();
     }
     
 }

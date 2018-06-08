@@ -49,6 +49,8 @@ public class DraggableClass extends Rectangle implements Draggable{
     private ArrayList<StackPane> implementPanes;
     private ArrayList<Line> implementLines;
     
+    private boolean isAbstract;
+    
     public DraggableClass(){
         
         methodBox = new VBox();
@@ -89,6 +91,8 @@ public class DraggableClass extends Rectangle implements Draggable{
         childPanes = new ArrayList();
         implementLines = new ArrayList();
         implementPanes = new ArrayList();
+        
+        isAbstract = false;
     }
     
     /**
@@ -393,6 +397,102 @@ public class DraggableClass extends Rectangle implements Draggable{
     
     public void removeImplementPane(StackPane sp){
         implementPanes.remove(sp);
+    }
+    
+    public boolean getIsAbstract(){
+        return isAbstract;
+    }
+    
+    public void setIsAbstract(boolean isAbstract){
+        this.isAbstract=isAbstract;
+    }
+    
+    /**
+     * Returns a formatted String of the entire class, including its variables 
+     * and methods
+     * 
+     * @return 
+     * A formatted String of the entire class
+     */
+    public String toExportString(){
+        String s = "";
+        
+        s+="public ";
+        if(nameBox.getChildren().size()==2){
+            s+="abstract ";
+        }
+        
+        s+="class" + ((Label)(nameBox.getChildren().get(0))).getText();
+        
+        if(hasParent()){
+            s+=" extends ";
+            DraggableClass parent = (DraggableClass)
+                getParentPane().getChildren().get(0);
+            s+=parent.getNameBox().getChildren().get(0) + " ";
+        }
+        
+        if(hasInterface()){
+            s+=" implements ";
+            for(StackPane sp:getImplementPanes()){
+                DraggableInterface di = (DraggableInterface)
+                    sp.getChildren().get(0);
+                String intName = ((Label)(di.getNameBox().getChildren().get(0)))
+                    .getText();
+                intName.replaceAll("<<","");
+                intName.replaceAll(">>","");
+                s+=intName + ", ";
+            }
+            //remove last comma
+            s=s.substring(0,s.length()-2);
+            s+=" ";
+        }
+        
+        s+="{\n";
+        
+        for(Var v: variableList){
+            s+=v.toExportString();
+        }
+        
+        for(Method m:methodList){
+            if(nameBox.getChildren().size()==2 && m.getIsAbstract()){
+                s+=m.toExportStringInterfaceAndAbstractMethod();
+            }
+            else{
+                s+=m.toExportStringClassAndStaticInterface();
+            }
+            
+        }
+        
+        //need to add actual implementation of interface methods if it's not 
+        //abstract
+        if(hasInterface() && nameBox.getChildren().size()!=2){
+            for(StackPane sp:getImplementPanes()){
+                DraggableInterface di = (DraggableInterface)
+                    sp.getChildren().get(0);
+                for(Method m:di.getMethodList()){
+                    s+=m.toExportStringClassAndStaticInterface();
+                }
+            }
+        }
+        
+        //need to add implementation of abstract methods from parent if 
+        //necessary
+        if(hasParent() && nameBox.getChildren().size()!=2){
+            DraggableClass dc = (DraggableClass)
+                getParentPane().getChildren().get(0);
+            //if parent is abstract - already know child isn't
+            if(dc.getNameBox().getChildren().size()==2){
+                for(Method m:dc.getMethodList()){
+                    if(m.getIsAbstract()){
+                        s+=m.toExportStringClassAndStaticInterface();
+                    }
+                }
+            }
+        }
+        
+        
+        
+        return s;
     }
     
 }

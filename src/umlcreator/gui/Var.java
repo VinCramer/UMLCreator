@@ -4,6 +4,7 @@ package umlcreator.gui;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
+import umlcreator.file.FileManager;
 
 /**
  *
@@ -159,5 +160,63 @@ public class Var {
     public BooleanProperty getIsFinalBooleanProperty(){
         return isFinal;
     }
+    
+    /**
+     * Provides a formatted String that will be used by the FileManager when 
+     * exporting to functional Java code. Since Java practice dictates that only
+     * final variables are valid in interfaces, we'll assume the user knows this
+     * and won't need 2 methods for class and interface.
+     * 
+     * @return 
+     * Formatted String representation of the Var object just like a field in a 
+     * Java class or interface.
+     */
+    public String toExportString(){
+       String s = "";
+       s+=visibility+" ";
+       if(isStatic.get()){
+           s+=" static " ;
+       }
+       if(isFinal.get()){
+           s+=" final ";
+       }
+       s+=type + " " + name;
+       
+       //only assign value if it's final
+       if(isFinal.get()){
+           s+=" = ";
+           if(type.equals("int")){
+               s+=FileManager.DUMMY_INT+";";
+           }
+           else if(type.equals("double")){
+               s+=FileManager.DUMMY_DOUBLE+";";
+           }
+           else if(type.equals("boolean")){
+               s+=FileManager.DUMMY_BOOLEAN+";";
+           }
+           else if(type.equals("char")){
+               s+=FileManager.DUMMY_CHAR+";";
+           }
+           else if(type.equals("long")){
+               s+=FileManager.DUMMY_LONG+";";
+           }
+           else if(type.equals("byte")){
+               s+=FileManager.DUMMY_BYTE+";";
+           }
+           else if(type.equals("String")){
+               s+=FileManager.DUMMY_STRING+";";
+           }
+           else{
+               s+="new " + type + "();";
+           }
+       }
+       else{
+           s+=";";
+       }
+       
+       s+="\n";
+       return s;
+    }
+    
     
 }
