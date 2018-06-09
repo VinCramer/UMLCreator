@@ -308,6 +308,10 @@ public class Workspace extends AppWorkspaceComponent{
             editController.processSnapshot();
         });
         
+        exportCodeButton.setOnAction(e-> {
+            editController.processExportCode(fileManager);
+        });
+        
         zoomInButton.setOnAction(e->{
             if(scale.getX()<2){
                 scale.setX(scale.getX()*1.1);

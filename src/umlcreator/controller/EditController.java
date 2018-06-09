@@ -26,6 +26,7 @@ import umlcreator.data.DataManager;
 import umlcreator.data.Draggable;
 import umlcreator.data.DraggableClass;
 import umlcreator.data.UMLCreatorState;
+import umlcreator.file.FileManager;
 import umlcreator.gui.Workspace;
 
 /**
@@ -200,6 +201,39 @@ public class EditController {
             dataManager.setState(UMLCreatorState.SELECTING_PANE);
         }
         
+    }
+    
+    /**
+     * Method used for handling the save and exporting of the user's classes and
+     * interfaces into code
+     * 
+     * @param fileManager 
+     * The fileManager which will be used to write the classes/interfaces to an 
+     * actual file
+     */
+    public void processExportCode(FileManager fileManager){
+        
+        PropertiesManager props = PropertiesManager.getPropertiesManager();
+            
+        FileChooser fc = new FileChooser();
+        fc.setInitialDirectory(new File("./work/"));
+        
+        fc.setTitle(props.getProperty(SAVE_WORK_TITLE));
+
+        File selectedFile = fc.showSaveDialog(app.getGUI().getWindow());
+        String fString = selectedFile.toString();
+        try{
+            fileManager.exportData(dataManager,fString);
+            AppMessageDialogSingleton dialog = AppMessageDialogSingleton.
+                    getSingleton();
+            dialog.show(props.getProperty(SAVE_COMPLETED_TITLE),props.
+                    getProperty(SAVE_COMPLETED_MESSAGE));
+        }catch(IOException ioe){
+            AppMessageDialogSingleton dialog = AppMessageDialogSingleton.
+                    getSingleton();
+	    dialog.show(props.getProperty(SAVE_ERROR_TITLE), props.
+                    getProperty(SAVE_ERROR_MESSAGE));
+        }
     }
     
 }

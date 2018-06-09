@@ -3,11 +3,16 @@ package umlcreator.file;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
+import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
 import saf.components.AppDataComponent;
 import saf.components.AppFileComponent;
 import umlcreator.data.DataManager;
+import umlcreator.data.Draggable;
+import umlcreator.data.DraggableClass;
+import umlcreator.data.DraggableInterface;
 
 /**
  *
@@ -47,9 +52,65 @@ public class FileManager implements AppFileComponent{
         DataManager dataManager = (DataManager)data;
         ArrayList<StackPane> panes = dataManager.getPanes();
         
+        //project folder
         File file = new File(filePath);
         file.mkdir();
-        //TODO - pick up here!
+        
+        //source code folder
+        String srcLocation = file.getPath()+"\\src";
+        File src = new File(srcLocation);
+        src.mkdir();
+        
+        PrintWriter pw;
+        
+        DraggableClass dc;
+        DraggableInterface di;
+        Draggable drag;
+            
+        String packageName, name;
+        boolean nestedPackage;
+        
+        //iterate through each pane, and if there's a package, we need to create
+        //a folder for that class/interface
+        for(StackPane sp:panes){
+            drag = (Draggable)sp.getChildren().get(0);
+            dc = null;
+            di = null;
+            nestedPackage = false;
+            
+            if(drag instanceof DraggableClass){
+                dc = (DraggableClass)drag;
+                packageName = dc.getPackageName();
+                name = ((Label)(dc.getNameBox().getChildren().get(0))).getText();
+            }
+            else{
+                di = (DraggableInterface)drag;
+                packageName = di.getPackageName();
+                name = ((Label)(di.getNameBox().getChildren().get(0))).getText();
+            }
+            
+            if(packageName.contains(".")){
+                nestedPackage=true;
+            }
+            
+            if(nestedPackage){
+                //TODO - finish this!
+            }
+            
+            pw = new PrintWriter(srcLocation + "\\src" + name+".java");
+            
+            if(dc != null){
+                
+                pw.write(dc.toExportString());
+                pw.close();
+            }
+            else{
+                pw.print(di.toExportString());
+                pw.close();
+            }
+            
+        }
+        
     }
 
     @Override

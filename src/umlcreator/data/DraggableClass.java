@@ -417,12 +417,44 @@ public class DraggableClass extends Rectangle implements Draggable{
     public String toExportString(){
         String s = "";
         
+        if(!packageName.equals("")){
+            s+="package " + packageName + ";\n";
+        }
+        
+        if(hasAPIPane()){
+            VBox v = (VBox)apiPane.getChildren().get(1);
+            for(int i=0;i<v.getChildren().size();i++){
+                
+                
+                Label apiLabel = (Label)v.getChildren().get(i);
+                
+                String api = apiLabel.getText();
+                
+                //use this library to get the full name of the Java library, if 
+                //the user entered a valid name
+                Package[] pack = Package.getPackages();
+                
+                for(Package p:pack){
+                    try{
+                        Class cl = Class.forName(p.getName()+"."+api);
+                        s+="import "+cl.getName()+";\n";
+                    }
+                    catch(ClassNotFoundException c){
+                        
+                    }
+                }
+                
+            }
+            
+            
+        }
+        
         s+="public ";
         if(nameBox.getChildren().size()==2){
             s+="abstract ";
         }
         
-        s+="class" + ((Label)(nameBox.getChildren().get(0))).getText();
+        s+="class " + ((Label)(nameBox.getChildren().get(0))).getText();
         
         if(hasParent()){
             s+=" extends ";
@@ -438,8 +470,8 @@ public class DraggableClass extends Rectangle implements Draggable{
                     sp.getChildren().get(0);
                 String intName = ((Label)(di.getNameBox().getChildren().get(0)))
                     .getText();
-                intName.replaceAll("<<","");
-                intName.replaceAll(">>","");
+                intName = intName.replaceAll("<<","");
+                intName = intName.replaceAll(">>","");
                 s+=intName + ", ";
             }
             //remove last comma
@@ -490,7 +522,7 @@ public class DraggableClass extends Rectangle implements Draggable{
             }
         }
         
-        
+        s+="\n}\n";
         
         return s;
     }
