@@ -67,8 +67,10 @@ public class FileManager implements AppFileComponent{
         DraggableInterface di;
         Draggable drag;
             
-        String packageName, name;
+        String packageName, name, baseLocation;
         boolean nestedPackage;
+
+        File f;
         
         //iterate through each pane, and if there's a package, we need to create
         //a folder for that class/interface
@@ -87,7 +89,10 @@ public class FileManager implements AppFileComponent{
                 di = (DraggableInterface)drag;
                 packageName = di.getPackageName();
                 name = ((Label)(di.getNameBox().getChildren().get(0))).getText();
+                name = name.replaceAll("<<","");
+                name = name.replaceAll(">>","");
             }
+            
             
             if(packageName.contains(".")){
                 nestedPackage=true;
@@ -95,10 +100,31 @@ public class FileManager implements AppFileComponent{
             
             if(nestedPackage){
                 //TODO - finish this!
+                //string literal of period
+                String[] parts = packageName.split("[.]");
+                baseLocation = srcLocation+ "\\";
+                for(String s: parts){
+                    File tempFile = new File(baseLocation+s);
+                    if(!tempFile.exists()){
+                        tempFile.mkdir();
+                    }
+                    baseLocation+=s + "\\";
+                }
+            }
+            else{
+                baseLocation = srcLocation;
+            }
+            if(!nestedPackage && !packageName.equals("")){
+                baseLocation = srcLocation + "\\" + packageName;
+                File tempFile = new File(baseLocation);
+                    if(!tempFile.exists()){
+                        tempFile.mkdir();
+                    }
             }
             
-            pw = new PrintWriter(srcLocation + "\\src" + name+".java");
             
+            f = new File(baseLocation + "\\"  + name+".java");
+            pw = new PrintWriter(f);
             if(dc != null){
                 
                 pw.write(dc.toExportString());

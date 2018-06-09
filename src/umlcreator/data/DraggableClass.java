@@ -449,6 +449,35 @@ public class DraggableClass extends Rectangle implements Draggable{
             
         }
         
+        //if parent isn't in same package, need to import it
+        if(hasParent()){
+            String parentPackage, parentName;
+            DraggableClass parentDC = (DraggableClass)
+                    parentPane.getChildren().get(0);
+            parentPackage = parentDC.getPackageName();
+            Label tempParentLabel = (Label)parentDC.getNameBox().getChildren().get(0);
+            parentName = tempParentLabel.getText();
+            if(!parentPackage.equals(packageName)){
+                s+="import " + parentPackage + "." + parentName + "\n";
+            }
+        }
+        
+        //if interface isn't in same package, need to import it
+        if(hasInterface()){
+            for(StackPane intPane: implementPanes){
+                DraggableInterface di = (DraggableInterface)
+                        intPane.getChildren().get(0);
+                String intPackage = di.getPackageName();
+                Label iLabel = di.getNameLabel();
+                String intName = iLabel.getText();
+                intName = intName.replaceAll("<<","");
+                intName = intName.replaceAll(">>","");
+                if(!intPackage.equals(packageName)){
+                    s+="import " + intPackage + "." + intName + ";\n";
+                }
+            }
+        }
+        
         s+="public ";
         if(nameBox.getChildren().size()==2){
             s+="abstract ";
@@ -460,7 +489,8 @@ public class DraggableClass extends Rectangle implements Draggable{
             s+=" extends ";
             DraggableClass parent = (DraggableClass)
                 getParentPane().getChildren().get(0);
-            s+=parent.getNameBox().getChildren().get(0) + " ";
+            Label temp = (Label)parent.getNameBox().getChildren().get(0); 
+            s+= temp.getText() + " ";
         }
         
         if(hasInterface()){

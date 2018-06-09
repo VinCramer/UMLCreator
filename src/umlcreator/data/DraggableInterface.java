@@ -438,6 +438,25 @@ public class DraggableInterface extends Rectangle implements Draggable{
             }
         }
                 
+        //if parent isn't in same package, need to import it
+        if(hasParent()){
+            String parentPackage, parentName;
+            
+            for(StackPane parentPane:parentPanes){
+                DraggableInterface parentDI = (DraggableInterface)
+                    parentPane.getChildren().get(0);
+                parentPackage = parentDI.getPackageName();
+                Label tempParentLabel = (Label)parentDI.getNameBox().getChildren().get(0);
+                parentName = tempParentLabel.getText();
+                parentName = parentName.replaceAll("<<","");
+                parentName = parentName.replaceAll(">>","");
+                if(!parentPackage.equals(packageName)){
+                    s+="import " + parentPackage + "." + parentName + "\n";
+                }
+            }
+            
+        }
+        
             
         
         s+="public ";

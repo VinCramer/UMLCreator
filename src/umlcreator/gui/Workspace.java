@@ -1985,15 +1985,21 @@ public class Workspace extends AppWorkspaceComponent{
                 StackPane localPane = dataManager.getSelectedPane();
                 Draggable drag = (Draggable)localPane.getChildren().get(0);
                 DraggableClass tempDraggableClass = null;
+                DraggableInterface tempDI = null;
                 
-                //interface
                 if(drag instanceof DraggableClass){
                     tempDraggableClass = (DraggableClass)drag;
+                }
+                else{
+                    tempDI = (DraggableInterface)drag;
                 }
                 
                 if(tempDraggableClass!=null){
                     
                     tempDraggableClass.setPackageName(newValue);
+                }
+                else{
+                    tempDI.setPackageName(newValue);
                 }
             }
             
@@ -2003,6 +2009,9 @@ public class Workspace extends AppWorkspaceComponent{
         //updates package name in right hand side
         if(draggableClass!=null){
             packageTextField.setText(draggableClass.getPackageName());
+        }
+        else{
+            packageTextField.setText(draggableInterface.getPackageName());
         }
         
         
