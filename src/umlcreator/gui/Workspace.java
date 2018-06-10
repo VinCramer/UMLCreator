@@ -1720,10 +1720,13 @@ public class Workspace extends AppWorkspaceComponent{
                     Label newLabel = new Label("{abstract}");
                     newLabel.getStyleClass().add("uml_label");
                     tempDraggableClass.getNameBox().getChildren().add(newLabel);
+                    tempDraggableClass.setIsAbstract(true);
                 }
                 
                 if(!isAbstract && tempDraggableClass.getNameBox().getChildren().size()==2){
                     tempDraggableClass.getNameBox().getChildren().remove(1);
+                    tempDraggableClass.setIsAbstract(false);
+                    
                 }
                 
             }
@@ -1753,10 +1756,12 @@ public class Workspace extends AppWorkspaceComponent{
                     Label newLabel = new Label("{abstract}");
                     newLabel.getStyleClass().add("uml_label");
                     tempDraggableInterface.getNameBox().getChildren().add(newLabel);
+                    tempDraggableInterface.setIsAbstract(true);
                 }
                 
                 if(!isAbstract && tempDraggableInterface.getNameBox().getChildren().size()==2){
                     tempDraggableInterface.getNameBox().getChildren().remove(1);
+                    tempDraggableInterface.setIsAbstract(false);
                 }
             }
             return property;
