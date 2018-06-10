@@ -1,7 +1,7 @@
 # UMLCreator
-A JavaFX application based on the SBU CSE 219 course project using the given libraries (PropertiesManager, SimpleAppFramework, XMLUtilities, javax-json-1.0.4) from Professor Richard McKenna(https://www.cs.stonybrook.edu/people/faculty/RichardMcKenna) that creates fully functional UML diagrams.
+A JavaFX application based on the SBU CSE 219 Spring 2016 course project using the given libraries (PropertiesManager, SimpleAppFramework, XMLUtilities, javax-json-1.0.4) from Professor Richard McKenna(https://www.cs.stonybrook.edu/people/faculty/RichardMcKenna) that creates fully functional UML diagrams.
 
-Despite still having the functional original version of this project, this repository is a remastering of the production to bring the code quality up to my current standards. 
+This repository is a remastering of my older version of the project to bring the code quality up to my current standards. 
 
 # Program functions:
 - Launching a new project
@@ -16,11 +16,11 @@ Despite still having the functional original version of this project, this repos
 - Removing variables and methods added by the user
 - Taking screenshots of UML diagram
 - Automatically adding a pane to indicate what external libraries are potentially necessary
+- Exporting UML diagram to compiling Java code
+- Saving to a JSON file
 
 # Program functions to include:
-- Saving to a JSON file
 - Loading from a JSON file
-- Exporting UML diagram to compiling Java code
 - Resizing classes and interfaces
 - Zooming in and out
 
