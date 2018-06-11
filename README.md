@@ -18,9 +18,9 @@ This repository is a remastering of my older version of the project to bring the
 - Automatically adding a pane to indicate what external libraries are potentially necessary
 - Exporting UML diagram to compiling Java code
 - Saving to a JSON file
+- Loading from a JSON file
 
 # Program functions to include:
-- Loading from a JSON file
 - Resizing classes and interfaces
 - Zooming in and out
 
