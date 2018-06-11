@@ -412,4 +412,9 @@ public class DataManager implements AppDataComponent{
         return workspace.getUserMadePanes();
     }
     
+    public void addPanesToWorkspace(ArrayList<StackPane> panes){
+        Workspace workspace = (Workspace)app.getWorkspaceComponent();
+        workspace.addPanesToWorkspace(panes);
+    }
+    
 }

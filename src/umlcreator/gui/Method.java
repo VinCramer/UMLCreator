@@ -103,8 +103,10 @@ public class Method {
         sub = sub.substring(parentheseIndex);
         
        
-        int spaceIndex = sub.indexOf(" ");
-        returnType = sub.substring(0,spaceIndex);
+        
+        returnType = sub.substring(2);
+        returnType = returnType.replace("{abstract}","");
+        returnType = returnType.trim();
         
         if(s.contains("{abstract}")){
             isAbstract = new SimpleBooleanProperty(true);

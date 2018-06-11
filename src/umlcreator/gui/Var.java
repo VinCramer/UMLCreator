@@ -85,7 +85,9 @@ public class Var {
             }
         }
         
-        if(counter == sub.length()-1){
+        //need to explicitly check if counter==0 due to some variables having a 
+        //name length of 1
+        if(counter == sub.length()-1 && counter!=0){
             isFinal.set(true);
         }
         

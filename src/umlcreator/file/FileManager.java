@@ -456,24 +456,23 @@ public class FileManager implements AppFileComponent{
         Iterator classIterator = classCollection.iterator();
         Iterator interfaceIterator = interfaceCollection.iterator();
         
+        ArrayList<StackPane> loadedPanes = new ArrayList();
 
+        //load in all of the classes
         while(classIterator.hasNext()){
-            try{
             JsonObject jo = (JsonObject)classIterator.next();
-            StackPane sp = loadPane(jo, true);    
-            }
-            catch (Exception e){
-                e.printStackTrace();
-            }
-            
+            StackPane sp = loadPane(jo, true); 
+            loadedPanes.add(sp);
         }
         
+        //then load in the interfaces
         while(interfaceIterator.hasNext()){
             JsonObject jo = (JsonObject)interfaceIterator.next();
             StackPane sp = loadPane(jo, false);
+            loadedPanes.add(sp);
         }
         
-        
+        dataManager.addPanesToWorkspace(loadedPanes);
     }
     
     /**
@@ -541,6 +540,7 @@ public class FileManager implements AppFileComponent{
         //put the {abstract} label if necessary
         if(isAbstract){
             Label absLabel = new Label("{abstract}");
+            absLabel.getStyleClass().add("uml_label");
             dc.getNameBox().getChildren().add(absLabel);
         }
         
@@ -548,6 +548,7 @@ public class FileManager implements AppFileComponent{
         dc.getMethodBox().getStyleClass().add("rect_vbox");
         dc.getVarBox().getStyleClass().add("rect_vbox");
         dc.getVarBox().setMinHeight(dc.getHeight()/3.0);
+
         
         JsonArray varArray = jo.getJsonArray("variables");
         JsonArray methodArray = jo.getJsonArray("methods");
@@ -555,32 +556,49 @@ public class FileManager implements AppFileComponent{
         JsonArray interfaceArray = jo.getJsonArray("interfaces");
         
         
-        //TODO - need to use same collections trick from earlier here!
+        
         ArrayList<String> varStrings = new ArrayList();
+        
         for(int i=0;i<varArray.size();i++){
             JsonObject temp = varArray.getJsonObject(i);
-            varStrings.add(varArray.getString(i));
+            String str = temp.getString("var");
+            varStrings.add(str);
         }
         ArrayList<String> methodStrings = new ArrayList();
         for(int i=0;i<methodArray.size();i++){
-            methodStrings.add(methodArray.getString(i));
+            JsonObject temp = methodArray.getJsonObject(i);
+            String str = temp.getString("method");
+            methodStrings.add(str);
         }
         
         ArrayList<Var> varList = new ArrayList();
         ArrayList<Method> methodList = new ArrayList();
+        ArrayList<Label> varLabelList = new ArrayList();
+        ArrayList<Label> methodLabelList = new ArrayList();
         
         for(String s:varStrings){
            Var v = new Var(s);
            varList.add(v);
+           Label l = new Label(v.toString());
+           l.getStyleClass().add("uml_label");
+           varLabelList.add(l);
         }
         
         for(String s:methodStrings){
             Method m = new Method(s);
             methodList.add(m);
+            Label l = new Label(m.toString());
+            l.getStyleClass().add("uml_label");
+            methodLabelList.add(l);
         }
         
         dc.setMethodList(methodList);
         dc.setVariableList(varList);
+        
+        dc.getMethodBox().getChildren().addAll(methodLabelList);
+        dc.setMethodLabelList(methodLabelList);
+        dc.getVarBox().getChildren().addAll(varLabelList);
+        dc.setVariableLabelList(varLabelList);
         
         //place all of the parts into an HBox to display in top-down order
         dc.getHolderBox().getChildren().addAll(dc.getNameBox(),
@@ -597,6 +615,85 @@ public class FileManager implements AppFileComponent{
         boolean hasAPI = jo.getBoolean("hasAPI");
 
         di.setIsAbstract(isAbstract);
+        di.setLoadHasAPIPane(hasAPI);
+        di.setLoadHasParent(hasParent);
+        
+        //then load the name
+        String intName = jo.getString("name");
+        
+        Label nameLabel = new Label(intName);
+        nameLabel.getStyleClass().add("uml_label");
+        di.setNameLabel(nameLabel);
+        
+        di.getNameBox().getChildren().add(nameLabel);
+        di.getNameBox().getStyleClass().add("rect_vbox");
+        di.getNameBox().setMinHeight(di.getHeight()/3.0);
+        
+        //put the {abstract} label if necessary
+        if(isAbstract){
+            Label absLabel = new Label("{abstract}");
+            absLabel.getStyleClass().add("uml_label");
+            di.getNameBox().getChildren().add(absLabel);
+        }
+        
+        di.getMethodBox().setMinHeight(di.getHeight()/3.0);
+        di.getMethodBox().getStyleClass().add("rect_vbox");
+        di.getVarBox().getStyleClass().add("rect_vbox");
+        di.getVarBox().setMinHeight(di.getHeight()/3.0);
+        
+        
+        JsonArray varArray = jo.getJsonArray("variables");
+        JsonArray methodArray = jo.getJsonArray("methods");
+        JsonArray apiArray = jo.getJsonArray("APIs");
+        JsonArray parentArray = jo.getJsonArray("Parents");
+        
+        
+        ArrayList<String> varStrings = new ArrayList();
+        
+        for(int i=0;i<varArray.size();i++){
+            JsonObject temp = varArray.getJsonObject(i);
+            String str = temp.getString("var");
+            varStrings.add(str);
+        }
+        ArrayList<String> methodStrings = new ArrayList();
+        for(int i=0;i<methodArray.size();i++){
+            JsonObject temp = methodArray.getJsonObject(i);
+            String str = temp.getString("method");
+            methodStrings.add(str);
+        }
+        
+        ArrayList<Var> varList = new ArrayList();
+        ArrayList<Method> methodList = new ArrayList();
+        ArrayList<Label> varLabelList = new ArrayList();
+        ArrayList<Label> methodLabelList = new ArrayList();
+        
+        for(String s:varStrings){
+           Var v = new Var(s);
+           varList.add(v);
+           Label l = new Label(v.toString());
+           l.getStyleClass().add("uml_label");
+           varLabelList.add(l);
+        }
+        
+        for(String s:methodStrings){
+            Method m = new Method(s);
+            methodList.add(m);
+            Label l = new Label(m.toString());
+            l.getStyleClass().add("uml_label");
+            methodLabelList.add(l);
+        }
+        
+        di.setMethodList(methodList);
+        di.setVariableList(varList);
+        
+        di.getMethodBox().getChildren().addAll(methodLabelList);
+        di.setMethodLabelList(methodLabelList);
+        di.getVarBox().getChildren().addAll(varLabelList);
+        di.setVariableLabelList(varLabelList);
+        
+        //place all of the parts into an HBox to display in top-down order
+        di.getHolderBox().getChildren().addAll(di.getNameBox(),
+                di.getVarBox(),di.getMethodBox());
         
         return di;
     }

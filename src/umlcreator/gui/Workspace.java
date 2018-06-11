@@ -2767,5 +2767,20 @@ public class Workspace extends AppWorkspaceComponent{
         tempVBox.getChildren().add(l);
     }
     
+    /**
+     * Adds all of the given panes to the user's workspace, including the API 
+     * panes and implementation/inheritance lines
+     * 
+     * @param panes 
+     * The list of panes that are added to the workspace
+     */
+    public void addPanesToWorkspace(ArrayList<StackPane> panes){
+        userMadePanes = panes;
+        
+        workspace.getChildren().addAll(panes);
+        
+        //TODO - add api panes and parent/implement lines
+    }
+    
     
 }
