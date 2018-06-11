@@ -39,6 +39,8 @@ public class DraggableInterface extends Rectangle implements Draggable{
     
     private VBox methodBox, varBox, nameBox, holderBox;
     
+    private ArrayList<String> loadParentNames;
+    
     private boolean isAbstract;
     
     private boolean loadHasAPIPane, loadHasParent;
@@ -52,6 +54,7 @@ public class DraggableInterface extends Rectangle implements Draggable{
         
         setX(100);
         setY(100);
+        loadParentNames = new ArrayList();
         
         
         setWidth(100);
@@ -129,6 +132,14 @@ public class DraggableInterface extends Rectangle implements Draggable{
     
     public boolean getLoadHasParent(){
         return loadHasParent;
+    }
+    
+    public ArrayList<String> getLoadParentNames(){
+        return loadParentNames;
+    }
+    
+    public void setLoadParentNames(ArrayList<String> loadParentNames){
+        this.loadParentNames = loadParentNames;
     }
 
     @Override

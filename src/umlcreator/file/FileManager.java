@@ -10,7 +10,6 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -18,12 +17,14 @@ import java.util.Map;
 import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Line;
+import javafx.scene.shape.Rectangle;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonNumber;
 import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
 import javax.json.JsonReader;
 import javax.json.JsonValue;
 import javax.json.JsonWriter;
@@ -458,11 +459,15 @@ public class FileManager implements AppFileComponent{
         
         ArrayList<StackPane> loadedPanes = new ArrayList();
 
+        ArrayList<StackPane> loadedClasses = new ArrayList();
+        ArrayList<StackPane> loadedInterfaces = new ArrayList();
+        
         //load in all of the classes
         while(classIterator.hasNext()){
             JsonObject jo = (JsonObject)classIterator.next();
             StackPane sp = loadPane(jo, true); 
             loadedPanes.add(sp);
+            loadedClasses.add(sp);
         }
         
         //then load in the interfaces
@@ -470,9 +475,11 @@ public class FileManager implements AppFileComponent{
             JsonObject jo = (JsonObject)interfaceIterator.next();
             StackPane sp = loadPane(jo, false);
             loadedPanes.add(sp);
+            loadedInterfaces.add(sp);
         }
         
-        dataManager.addPanesToWorkspace(loadedPanes);
+        dataManager.addPanesToWorkspace(loadedPanes, loadedClasses,
+                loadedInterfaces);
     }
     
     /**
@@ -515,6 +522,9 @@ public class FileManager implements AppFileComponent{
     private DraggableClass loadDraggableClass(JsonObject jo){
         DraggableClass dc = new DraggableClass();
         
+        dc.setX(getDataAsDouble(jo,"x"));
+        dc.setY(getDataAsDouble(jo,"y"));
+        
         //load boolean properties first
         boolean isAbstract = jo.getBoolean("isAbstract");
         boolean hasParent = jo.getBoolean("hasParent");
@@ -553,28 +563,91 @@ public class FileManager implements AppFileComponent{
         JsonArray varArray = jo.getJsonArray("variables");
         JsonArray methodArray = jo.getJsonArray("methods");
         JsonArray apiArray = jo.getJsonArray("APIs");
-        JsonArray interfaceArray = jo.getJsonArray("interfaces");
+        JsonArray interfaceArray = jo.getJsonArray("Interfaces");
         
+        String parentName = "";
         
+        if(hasParent){
+            parentName = jo.getString("Parent");
+            dc.setLoadParentName(parentName);
+        }
         
+        //load the names of the external libraries
+        ArrayList<String> apiStrings = new ArrayList();
+        if(apiArray.size()>0){
+            for(int i=0;i<apiArray.size();i++){
+                JsonObject temp = apiArray.getJsonObject(i);
+                String str = temp.getString("api");
+                apiStrings.add(str);
+            }
+        }
+        
+        //load the name of interfaces
+        ArrayList<String> interfaceStrings = new ArrayList();
+        if(interfaceArray.size()>0){
+            for(int i=0;i<interfaceArray.size();i++){
+                    JsonObject temp = interfaceArray.getJsonObject(i);
+                    String str = temp.getString("interface");
+                    interfaceStrings.add(str);
+            }
+        }
+        dc.setLoadInterfaceNames(interfaceStrings);
+        
+        //load all of the variables in UML String form
         ArrayList<String> varStrings = new ArrayList();
+
+        if(varArray.size()>0){
+            for(int i=0;i<varArray.size();i++){
+                JsonObject temp = varArray.getJsonObject(i);
+                String str = temp.getString("var");
+                varStrings.add(str);
+            }
+        }
         
-        for(int i=0;i<varArray.size();i++){
-            JsonObject temp = varArray.getJsonObject(i);
-            String str = temp.getString("var");
-            varStrings.add(str);
-        }
+        //load all of the methods in UML String form
         ArrayList<String> methodStrings = new ArrayList();
-        for(int i=0;i<methodArray.size();i++){
-            JsonObject temp = methodArray.getJsonObject(i);
-            String str = temp.getString("method");
-            methodStrings.add(str);
+        
+        if(methodArray.size()>0){
+            for(int i=0;i<methodArray.size();i++){
+                JsonObject temp = methodArray.getJsonObject(i);
+                String str = temp.getString("method");
+                methodStrings.add(str);
+            }
         }
+        
+        
         
         ArrayList<Var> varList = new ArrayList();
         ArrayList<Method> methodList = new ArrayList();
         ArrayList<Label> varLabelList = new ArrayList();
         ArrayList<Label> methodLabelList = new ArrayList();
+        
+        if(hasAPI){
+            StackPane apiPane = new StackPane();
+            Line l = new Line(dc.getLayoutX()-50,dc.getLayoutY()+dc.getHeight()
+                    /2.0,dc.getLayoutX(),dc.getLayoutY()+dc.getHeight()/2.0);
+            apiPane.getStyleClass().add("api_stack_pane");
+            Rectangle r = new Rectangle(50,30);
+            r.setFill(Color.WHITE);
+            VBox apiVBox = new VBox();
+            apiVBox.getStyleClass().add("rect_vbox");
+            
+            for(String str:apiStrings){
+                Label apiLabel = new Label(str);
+                apiLabel.getStyleClass().add("uml_label");
+                apiVBox.getChildren().add(apiLabel);
+            }
+            
+            apiPane.getChildren().addAll(r,apiVBox);
+
+            apiPane.setLayoutX(dc.getLayoutX()-75);
+            apiPane.setLayoutY(dc.getLayoutY()+dc.getHeight()/2.0
+                    -l.getStrokeWidth());
+            
+            
+            dc.setAPILine(l);
+            dc.setAPIPane(apiPane);
+        }
         
         for(String s:varStrings){
            Var v = new Var(s);
@@ -610,6 +683,9 @@ public class FileManager implements AppFileComponent{
     private DraggableInterface loadDraggableInterface(JsonObject jo){
         DraggableInterface di = new DraggableInterface();
         
+        di.setX(getDataAsDouble(jo,"x"));
+        di.setY(getDataAsDouble(jo,"y"));
+        
         boolean isAbstract = jo.getBoolean("isAbstract");
         boolean hasParent = jo.getBoolean("hasParent");
         boolean hasAPI = jo.getBoolean("hasAPI");
@@ -620,8 +696,8 @@ public class FileManager implements AppFileComponent{
         
         //then load the name
         String intName = jo.getString("name");
-        
-        Label nameLabel = new Label(intName);
+        di.setNameString(intName);
+        Label nameLabel = new Label("<<" + intName + ">>");
         nameLabel.getStyleClass().add("uml_label");
         di.setNameLabel(nameLabel);
         
@@ -647,6 +723,25 @@ public class FileManager implements AppFileComponent{
         JsonArray apiArray = jo.getJsonArray("APIs");
         JsonArray parentArray = jo.getJsonArray("Parents");
         
+        //load the names of the external libraries
+        ArrayList<String> apiStrings = new ArrayList();
+        if(apiArray.size()>0){
+            for(int i=0;i<apiArray.size();i++){
+                JsonObject temp = apiArray.getJsonObject(i);
+                String str = temp.getString("api");
+                apiStrings.add(str);
+            }
+        }
+        
+        ArrayList<String> parentNames = new ArrayList();
+        for(int i=0;i<parentArray.size();i++){
+                JsonObject temp = parentArray.getJsonObject(i);
+                String str = temp.getString("Parent");
+                parentNames.add(str);
+        }
+        
+        di.setLoadParentNames(parentNames);
+        
         
         ArrayList<String> varStrings = new ArrayList();
         
@@ -666,6 +761,45 @@ public class FileManager implements AppFileComponent{
         ArrayList<Method> methodList = new ArrayList();
         ArrayList<Label> varLabelList = new ArrayList();
         ArrayList<Label> methodLabelList = new ArrayList();
+        
+        
+        if(methodArray.size()>0){
+            for(int i=0;i<methodArray.size();i++){
+                JsonObject temp = methodArray.getJsonObject(i);
+                String str = temp.getString("method");
+                methodStrings.add(str);
+            }
+        }
+        
+        
+        
+        if(hasAPI){
+            StackPane apiPane = new StackPane();
+            Line l = new Line(di.getLayoutX()-50,di.getLayoutY()+di.getHeight()
+                    /2.0,di.getLayoutX(),di.getLayoutY()+di.getHeight()/2.0);
+            apiPane.getStyleClass().add("api_stack_pane");
+            Rectangle r = new Rectangle(50,30);
+            r.setFill(Color.WHITE);
+            VBox apiVBox = new VBox();
+            apiVBox.getStyleClass().add("rect_vbox");
+            
+            for(String str:apiStrings){
+                Label apiLabel = new Label(str);
+                apiLabel.getStyleClass().add("uml_label");
+                apiVBox.getChildren().add(apiLabel);
+            }
+            
+            apiPane.getChildren().addAll(r,apiVBox);
+
+            apiPane.setLayoutX(di.getLayoutX()-75);
+            apiPane.setLayoutY(di.getLayoutY()+di.getHeight()/2.0
+                    -l.getStrokeWidth());
+            
+            
+            di.setAPILine(l);
+            di.setAPIPane(apiPane);
+        }
+        
         
         for(String s:varStrings){
            Var v = new Var(s);
@@ -717,27 +851,7 @@ public class FileManager implements AppFileComponent{
 	return number.bigDecimalValue().doubleValue();	
     }
     
-    /**
-     * Helper method for providing a JsonObject from a given file path
-     * 
-     * @param jsonFilePath
-     * The location of the JSON file
-     * 
-     * @return
-     * A JsonObject representation of the JSON file
-     * 
-     * @throws IOException 
-     * Thrown in case we don't have read permission at the file path
-     */
-    private JsonObject loadJSONFile(String jsonFilePath) throws IOException {
-	InputStream is = new FileInputStream(jsonFilePath);
-	JsonReader jsonReader = Json.createReader(is);
-	JsonObject json = jsonReader.readObject();
-	jsonReader.close();
-	is.close();
-	return json;
-    }
-
+    
     /**
      * Exports the user made classes and interfaces into functioning Java files 
      * in the designated file path.

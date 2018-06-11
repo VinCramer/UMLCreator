@@ -2773,13 +2773,125 @@ public class Workspace extends AppWorkspaceComponent{
      * 
      * @param panes 
      * The list of panes that are added to the workspace
+     * 
+     * @param classes
+     * All of the panes which contain DraggableClasses
+     * 
+     * @param interfaces
+     * All of the panes which contain DraggableInterfaces
      */
-    public void addPanesToWorkspace(ArrayList<StackPane> panes){
+    public void addPanesToWorkspace(ArrayList<StackPane> panes, 
+            ArrayList<StackPane> classes, ArrayList<StackPane> interfaces){
         userMadePanes = panes;
         
         workspace.getChildren().addAll(panes);
         
-        //TODO - add api panes and parent/implement lines
+        for(StackPane sp:classes){
+            DraggableClass dc = (DraggableClass)sp.getChildren().get(0);
+            if(dc.hasAPIPane()){
+                Line l = dc.getAPILine();
+                
+                l.setStartX(dc.getX()-50);
+                l.setStartY(dc.getY()+dc.getHeight()/2.0);
+                l.setEndX(dc.getX());
+                l.setEndY(dc.getY()+dc.getHeight()/2.0);
+                
+                StackPane apiPane = dc.getAPIPane();
+                apiPane.setLayoutX(dc.getX()-75);
+                apiPane.setLayoutY(dc.getY()+dc.getHeight()/2.0
+                        -l.getStrokeWidth());
+                
+                workspace.getChildren().add(apiPane);
+                workspace.getChildren().add(l);
+                
+            }
+            
+            //need to add line, and set reference to kid's pane in adult
+            if(dc.getLoadHasParent()){
+                String parentName = dc.getLoadParentName();
+                for(StackPane parentPane:classes){
+                    DraggableClass parentDC = (DraggableClass)
+                            parentPane.getChildren().get(0);
+                    Label parentLabel = parentDC.getNameLabel();
+                    String potentialParent = parentLabel.getText();
+                    if(potentialParent.equals(parentName)){
+                        Line parentLine = new Line(dc.getX()+
+                                    dc.getWidth()/2.0,
+                                    dc.getY(),
+                                    parentDC.getX()+
+                                            parentDC.getWidth()/2.0,
+                                    parentDC.getY()+
+                                            parentDC.getHeight());
+                        dc.setParentLine(parentLine);
+                        workspace.getChildren().add(parentLine);
+                        parentDC.addChildPane(sp);
+                        dc.setParentPane(parentPane);
+                    }
+                }
+            }
+            if(dc.getLoadInterfaceNames().size()>0){
+                ArrayList<String> interfaceNames = dc.getLoadInterfaceNames();
+                for(StackPane interfacePane:interfaces){
+                    DraggableInterface di = (DraggableInterface)
+                            interfacePane.getChildren().get(0);
+                    String intName = di.getNameString();
+                    if(interfaceNames.contains(intName)){
+                        dc.addImplementPane(interfacePane);
+                        di.addClassPane(sp);
+                        Line l = new Line(dc.getX()+
+                                    dc.getWidth()/2.0,
+                                    dc.getY(),
+                                    di.getX()+di.getWidth()/2.0,
+                                    di.getY()+di.getHeight());
+                        dc.addImplementLine(l);
+                        workspace.getChildren().add(l);
+                    }
+                }
+            }
+        }
+        
+        for(StackPane sp:interfaces){
+            
+            DraggableInterface di = (DraggableInterface)sp.getChildren().get(0);
+            if(di.getLoadHasAPIPane()){
+                Line l = di.getAPILine();
+                
+                l.setStartX(di.getX()-50);
+                l.setStartY(di.getY()+di.getHeight()/2.0);
+                l.setEndX(di.getX());
+                l.setEndY(di.getY()+di.getHeight()/2.0);
+                
+                StackPane apiPane = di.getAPIPane();
+                apiPane.setLayoutX(di.getX()-75);
+                apiPane.setLayoutY(di.getY()+di.getHeight()/2.0
+                        -l.getStrokeWidth());
+                
+                workspace.getChildren().add(apiPane);
+                workspace.getChildren().add(l);
+            }
+            if(di.getLoadHasParent()){
+                ArrayList<String> parents = di.getLoadParentNames();
+                for(StackPane parentPane:interfaces){
+                    DraggableInterface parentDI = (DraggableInterface)
+                            parentPane.getChildren().get(0);
+                    String potentialParent = parentDI.getNameString();
+                    if(parents.contains(potentialParent)){
+                        di.addParentPane(parentPane);
+                        parentDI.addChildPane(sp);
+                        
+                        Line parentLine = new Line(di.getX()+
+                                    di.getWidth()/2.0,
+                                    di.getY(),
+                                    parentDI.getX()+
+                                            parentDI.getWidth()/2.0,
+                                    parentDI.getY()+
+                                            parentDI.getHeight());
+                        di.addParentLine(parentLine);
+                        workspace.getChildren().add(parentLine);
+                    }
+                }
+            }
+        }
     }
     
     

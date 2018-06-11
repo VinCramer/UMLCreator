@@ -28,9 +28,7 @@ public class DraggableClass extends Rectangle implements Draggable{
     private ArrayList<Method> methodList; 
     private ArrayList<Var> variableList;
     
-    //see if we need these lists - may be able to update by removing all 
-    //children from their repsective HBoxes, and then re-adding labels based on 
-    //their method/var lists
+    
     private ArrayList<Label> methodLabelList;
     private ArrayList<Label> variableLabelList;
     
@@ -52,6 +50,10 @@ public class DraggableClass extends Rectangle implements Draggable{
     private boolean isAbstract;
     
     private boolean loadHasParent, loadHasAPIPane, loadHasInterface;
+    
+    private String loadParentName;
+    private ArrayList<String> loadInterfaceNames;
+    
     
     public DraggableClass(){
         
@@ -95,6 +97,7 @@ public class DraggableClass extends Rectangle implements Draggable{
         implementPanes = new ArrayList();
         
         isAbstract = false;
+        loadInterfaceNames = new ArrayList();
     }
     
     /**
@@ -337,6 +340,14 @@ public class DraggableClass extends Rectangle implements Draggable{
         return parentPane!=null;
     }
     
+    public void setLoadInterfaceNames(ArrayList<String> loadInterfaceNames){
+        this.loadInterfaceNames = loadInterfaceNames;
+    }
+    
+    public ArrayList<String> getLoadInterfaceNames(){
+        return loadInterfaceNames;
+    }
+    
     public Line getParentLine(){
         return parentLine;
     }
@@ -374,7 +385,13 @@ public class DraggableClass extends Rectangle implements Draggable{
         implementPanes.add(sp);
     }
     
+    public void setLoadParentName(String loadParentName){
+        this.loadParentName = loadParentName;
+    }
     
+    public String getLoadParentName(){
+        return loadParentName;
+    }
     
     public void addChildPane(StackPane child){
         childPanes.add(child);
@@ -578,5 +595,7 @@ public class DraggableClass extends Rectangle implements Draggable{
         
         return s;
     }
+    
+    
     
 }
