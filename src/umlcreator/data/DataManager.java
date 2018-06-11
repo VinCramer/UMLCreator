@@ -74,7 +74,45 @@ public class DataManager implements AppDataComponent{
      */
     @Override
     public void reset() {
-
+        Workspace workspace = (Workspace)app.getWorkspaceComponent();
+        setState(UMLCreatorState.SELECTING_NOTHING);
+        selectedPane = null;
+        ArrayList<StackPane> userMadePanes = workspace.getUserMadePanes();
+        workspace.getWorkspace().getChildren().removeAll(userMadePanes);
+        for(StackPane sp:userMadePanes){
+            Draggable drag = (Draggable)sp.getChildren().get(0);
+            DraggableInterface di = null;
+            DraggableClass dc = null;
+            if(drag instanceof DraggableClass){
+                dc = (DraggableClass)drag;
+                if(dc.hasAPIPane()){
+                    workspace.getWorkspace().getChildren().remove(
+                            dc.getAPILine());
+                    workspace.getWorkspace().getChildren().remove(
+                            dc.getAPIPane());
+                }
+                if(dc.hasParent()){
+                    workspace.getWorkspace().getChildren().remove(
+                            dc.getParentLine());
+                }
+                if(dc.hasInterface()){
+                    workspace.getWorkspace().getChildren().removeAll(
+                            dc.getImplementLines());
+                }
+            }
+            else{
+                di = (DraggableInterface)drag;
+                if(di.hasAPIPane()){
+                    workspace.getWorkspace().getChildren().remove(
+                            di.getAPILine());
+                }
+                if(di.hasParent()){
+                    workspace.getWorkspace().getChildren().removeAll(
+                            di.getParentLines());
+                }
+            }
+            
+        }
     }
     
     /**

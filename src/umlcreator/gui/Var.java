@@ -31,6 +31,69 @@ public class Var {
     }
     
     /**
+     * Constructor for creating Var objects when loaded from a JSON file. 
+     * 
+     * @param s 
+     * The String that will be decoded into a Var object
+     */
+    public Var(String s){
+        
+        if(s.charAt(0)=='-'){
+            visibility="private";
+        }
+        else if(s.charAt(0)=='+'){
+            visibility="public";
+        }
+        else{
+            visibility="protected";
+        }
+        
+        String sub;
+        int index;
+        
+        if(s.charAt(1)=='$'){
+            isStatic = new SimpleBooleanProperty(true);
+            index = s.indexOf(":");
+            sub = s.substring(2,index);
+            type = s.substring(index+2);
+        }
+        else{
+            isStatic = new SimpleBooleanProperty(false);
+            index = s.indexOf(":");
+            sub = s.substring(1,index);
+            type = s.substring(index+2);
+        }
+        
+        name = sub;
+        
+        
+        
+        
+        
+        //now we have to check if it's final. The var name can include non 
+        //alphabetic characters, so we remove those first and then check if the 
+        //name is all caps.
+        sub = sub.replaceAll("[^a-zA-Z]","");
+        
+        //default value
+        isFinal = new SimpleBooleanProperty(false);
+
+        int counter = 0;
+        for(int i=0;i<sub.length();i++){
+            if(Character.isUpperCase(sub.charAt(i))){
+                counter++;
+            }
+        }
+        
+        if(counter == sub.length()-1){
+            isFinal.set(true);
+        }
+        
+        
+        
+    }
+    
+    /**
      * Returns a String representation of the variable, which will be displayed 
      * in the class or interface selected in the UML
      * 

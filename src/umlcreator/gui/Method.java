@@ -56,6 +56,92 @@ public class Method {
     }
     
     /**
+     * Used for creating a Method from a saved String via JSON file
+     * 
+     * @param s 
+     * The String which will be decoded and turned into a Method object
+     */
+    public Method(String s){
+        arguments = new ArrayList();
+        
+        if(s.charAt(0)=='+'){
+            visibility="public";
+        }
+        else if(s.charAt(0)=='-'){
+            visibility="private";
+        }
+        else{
+            visibility="protected";
+        }
+        
+        int index; 
+        String sub;
+        
+        if(s.charAt(1)=='$'){
+            index = s.indexOf("(");
+            isStatic = new SimpleBooleanProperty(true);
+            name = s.substring(2,index);
+            sub = s.substring(index+1);
+        }
+        else{
+            index = s.indexOf("(");
+            isStatic = new SimpleBooleanProperty(false);
+            name = s.substring(1,index);
+            sub = s.substring(index+1);
+        }
+        
+        //arguments
+        int parentheseIndex = sub.indexOf(")");
+        String argString = sub.substring(0,parentheseIndex);
+        
+        //has arguments
+        if(argString.length()!=0){
+            loadArguments(argString);
+        }
+        
+        
+        sub = sub.substring(parentheseIndex);
+        
+       
+        int spaceIndex = sub.indexOf(" ");
+        returnType = sub.substring(0,spaceIndex);
+        
+        if(s.contains("{abstract}")){
+            isAbstract = new SimpleBooleanProperty(true);
+        }
+        else{
+            isAbstract = new SimpleBooleanProperty(false);
+        }
+    }
+    
+    /**
+     * Helper method for loading in a Method from json file. Handles the 
+     * method's arguments.
+     * 
+     * @param s 
+     * The String containing the arguments which will be decoded
+     */
+    private void loadArguments(String s){
+        s=s.replaceAll("arg","");
+        s=s.replaceAll(": ","");
+        
+        //now just numbers and argument types, and maybe commas if >1 arg
+        if(!s.contains(",")){
+            arguments.add(s.substring(1));
+        }
+        else{
+            //remove all numbers
+            s = s.replaceAll("[0-9]","");
+            
+            //now only argument types in an array
+            String[] arr = s.split(",");
+            for(String str:arr){
+                arguments.add(str);
+            }
+        }
+    }
+    
+    /**
      * Returns a String representation of the method, which will be displayed 
      * in the class or interface selected in the UML
      * 
@@ -181,7 +267,13 @@ public class Method {
             arguments.remove(pos);
         }
         else{
-            arguments.set(pos,type);
+            if(pos<arguments.size()){
+                arguments.set(pos,type);
+            }
+            else{
+                arguments.add(type);
+            }
+            
         }
         
     }

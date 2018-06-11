@@ -51,6 +51,8 @@ public class DraggableClass extends Rectangle implements Draggable{
     
     private boolean isAbstract;
     
+    private boolean loadHasParent, loadHasAPIPane, loadHasInterface;
+    
     public DraggableClass(){
         
         methodBox = new VBox();
@@ -405,6 +407,26 @@ public class DraggableClass extends Rectangle implements Draggable{
     
     public void setIsAbstract(boolean isAbstract){
         this.isAbstract=isAbstract;
+    }
+    
+    public void setLoadHasAPIPane(boolean loadHasAPIPane){
+        this.loadHasAPIPane = loadHasAPIPane;
+    }
+    
+    public boolean getLoadHasAPIPane(){
+        return loadHasAPIPane;
+    }
+    
+    public void setLoadHasParent(boolean loadHasParent){
+        this.loadHasParent = loadHasParent;
+    }
+    
+    public boolean getLoadHasParent(){
+        return loadHasParent;
+    }
+    
+    public void setLoadHasInterface(boolean loadHasInterface){
+        this.loadHasInterface = loadHasInterface;
     }
     
     /**

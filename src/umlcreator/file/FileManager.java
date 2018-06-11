@@ -2,14 +2,18 @@
 package umlcreator.file;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
@@ -17,7 +21,11 @@ import javafx.scene.layout.VBox;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
+import javax.json.JsonNumber;
 import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import javax.json.JsonReader;
+import javax.json.JsonValue;
 import javax.json.JsonWriter;
 import javax.json.JsonWriterFactory;
 import javax.json.stream.JsonGenerator;
@@ -402,10 +410,235 @@ public class FileManager implements AppFileComponent{
         return jso;
     }
 
+    /**
+     * Loads the classes, interfaces, and relationships indicated by the file on
+     * the given file path into the workspace so the user can see it.
+     * 
+     * @param data
+     * The app itself
+     * 
+     * @param filePath
+     * Location of JSON file we're loading
+     * 
+     * @throws IOException 
+     * In case we don't have permission to read the file at the location
+     */
     @Override
     public void loadData(AppDataComponent data, String filePath) 
             throws IOException {
         
+        //remove everything else the user made in the current session from the 
+        //workspace
+        DataManager dataManager = (DataManager)data;
+	dataManager.reset();
+        
+        InputStream is = new FileInputStream(filePath);
+	JsonReader jsonReader = Json.createReader(is);
+	JsonObject json = jsonReader.readObject();
+	jsonReader.close();
+	is.close();
+
+        
+        
+        JsonArray jsonPaneArray = json.getJsonArray("panes");
+        //jsp -> arraybuilder
+        //jsp[0] -> object builder
+        //ob[0] -> collections unmodifiable map
+        //collections -> 2 values, json array builders
+        
+        
+        JsonObject classObj = jsonPaneArray.getJsonObject(0);
+        JsonObject intObj = jsonPaneArray.getJsonObject(1);
+        Collection classCollection = classObj.getJsonArray("classes");
+        Collection interfaceCollection = intObj.getJsonArray("interfaces");
+        
+        
+        Iterator classIterator = classCollection.iterator();
+        Iterator interfaceIterator = interfaceCollection.iterator();
+        
+
+        while(classIterator.hasNext()){
+            try{
+            JsonObject jo = (JsonObject)classIterator.next();
+            StackPane sp = loadPane(jo, true);    
+            }
+            catch (Exception e){
+                e.printStackTrace();
+            }
+            
+        }
+        
+        while(interfaceIterator.hasNext()){
+            JsonObject jo = (JsonObject)interfaceIterator.next();
+            StackPane sp = loadPane(jo, false);
+        }
+        
+        
+    }
+    
+    /**
+     * Helper method which provides a StackPane from a given JsonObject
+     * 
+     * @param jo
+     * The json representation of what will become a StackPane
+     * 
+     * @param isClass
+     * Tells us if the pane will contain a class, or an interface
+     * 
+     * @return 
+     * A properly formatted StackPane
+     */
+    private StackPane loadPane(JsonObject jo, boolean isClass){
+        StackPane sp = new StackPane();
+        sp.setMinWidth(100);
+        sp.setMinHeight(100);
+        
+        double x = getDataAsDouble(jo,"x");
+        double y = getDataAsDouble(jo,"y");
+        
+        if(isClass){
+            DraggableClass dc = loadDraggableClass(jo);
+            sp.getChildren().add(dc);
+            sp.getChildren().add(dc.getHolderBox());
+        }
+        else{
+            DraggableInterface di = loadDraggableInterface(jo);
+            sp.getChildren().add(di);
+            sp.getChildren().add(di.getHolderBox());
+        }
+        
+        sp.setLayoutX(x);
+        sp.setLayoutY(y);
+        
+        return sp;
+    }
+    
+    private DraggableClass loadDraggableClass(JsonObject jo){
+        DraggableClass dc = new DraggableClass();
+        
+        //load boolean properties first
+        boolean isAbstract = jo.getBoolean("isAbstract");
+        boolean hasParent = jo.getBoolean("hasParent");
+        boolean hasInterface = jo.getBoolean("hasInterface");
+        boolean hasAPI = jo.getBoolean("hasAPI");
+        
+        dc.setIsAbstract(isAbstract);
+        dc.setLoadHasAPIPane(hasAPI);
+        dc.setLoadHasParent(hasParent);
+        dc.setLoadHasInterface(hasInterface);
+        
+        //then load the name
+        String className = jo.getString("name");
+        
+        Label nameLabel = new Label(className);
+        nameLabel.getStyleClass().add("uml_label");
+        dc.setNameLabel(nameLabel);
+        
+        dc.getNameBox().getChildren().add(nameLabel);
+        dc.getNameBox().getStyleClass().add("rect_vbox");
+        dc.getNameBox().setMinHeight(dc.getHeight()/3.0);
+        
+        //put the {abstract} label if necessary
+        if(isAbstract){
+            Label absLabel = new Label("{abstract}");
+            dc.getNameBox().getChildren().add(absLabel);
+        }
+        
+        dc.getMethodBox().setMinHeight(dc.getHeight()/3.0);
+        dc.getMethodBox().getStyleClass().add("rect_vbox");
+        dc.getVarBox().getStyleClass().add("rect_vbox");
+        dc.getVarBox().setMinHeight(dc.getHeight()/3.0);
+        
+        JsonArray varArray = jo.getJsonArray("variables");
+        JsonArray methodArray = jo.getJsonArray("methods");
+        JsonArray apiArray = jo.getJsonArray("APIs");
+        JsonArray interfaceArray = jo.getJsonArray("interfaces");
+        
+        
+        //TODO - need to use same collections trick from earlier here!
+        ArrayList<String> varStrings = new ArrayList();
+        for(int i=0;i<varArray.size();i++){
+            JsonObject temp = varArray.getJsonObject(i);
+            varStrings.add(varArray.getString(i));
+        }
+        ArrayList<String> methodStrings = new ArrayList();
+        for(int i=0;i<methodArray.size();i++){
+            methodStrings.add(methodArray.getString(i));
+        }
+        
+        ArrayList<Var> varList = new ArrayList();
+        ArrayList<Method> methodList = new ArrayList();
+        
+        for(String s:varStrings){
+           Var v = new Var(s);
+           varList.add(v);
+        }
+        
+        for(String s:methodStrings){
+            Method m = new Method(s);
+            methodList.add(m);
+        }
+        
+        dc.setMethodList(methodList);
+        dc.setVariableList(varList);
+        
+        //place all of the parts into an HBox to display in top-down order
+        dc.getHolderBox().getChildren().addAll(dc.getNameBox(),
+                dc.getVarBox(),dc.getMethodBox());
+        
+        return dc;
+    }
+    
+    private DraggableInterface loadDraggableInterface(JsonObject jo){
+        DraggableInterface di = new DraggableInterface();
+        
+        boolean isAbstract = jo.getBoolean("isAbstract");
+        boolean hasParent = jo.getBoolean("hasParent");
+        boolean hasAPI = jo.getBoolean("hasAPI");
+
+        di.setIsAbstract(isAbstract);
+        
+        return di;
+    }
+    
+    /**
+     * Helper method for saving time and parsing a double from a stored number 
+     * in the json object
+     * 
+     * @param json
+     * The json object which contains the number we want as a double
+     * 
+     * @param dataName
+     * The name of the field we want as a double
+     * 
+     * @return 
+     * A double value for the desired field 
+     */
+    private double getDataAsDouble(JsonObject json, String dataName){
+        JsonValue value = json.get(dataName);
+	JsonNumber number = (JsonNumber)value;
+	return number.bigDecimalValue().doubleValue();	
+    }
+    
+    /**
+     * Helper method for providing a JsonObject from a given file path
+     * 
+     * @param jsonFilePath
+     * The location of the JSON file
+     * 
+     * @return
+     * A JsonObject representation of the JSON file
+     * 
+     * @throws IOException 
+     * Thrown in case we don't have read permission at the file path
+     */
+    private JsonObject loadJSONFile(String jsonFilePath) throws IOException {
+	InputStream is = new FileInputStream(jsonFilePath);
+	JsonReader jsonReader = Json.createReader(is);
+	JsonObject json = jsonReader.readObject();
+	jsonReader.close();
+	is.close();
+	return json;
     }
 
     /**
@@ -515,6 +748,13 @@ public class FileManager implements AppFileComponent{
         
     }
 
+    /**
+     * This method is here to satisfy the compiler, but isn't used by the actual
+     * application
+     * @param data
+     * @param filePath
+     * @throws IOException 
+     */
     @Override
     public void importData(AppDataComponent data, String filePath) 
             throws IOException {

@@ -1683,7 +1683,7 @@ public class Workspace extends AppWorkspaceComponent{
             
             //updates Method, GUI later
             property.addListener((observable, oldValue, newValue) -> 
-                    cellValue.setIsStatic(newValue));
+                    cellValue.setIsAbstract(newValue));
             
             DraggableClass tempDraggableClass = null;
             DraggableInterface tempDraggableInterface = null;
@@ -1844,22 +1844,13 @@ public class Workspace extends AppWorkspaceComponent{
                     newTableColumn.setOnEditCommit(
                             (CellEditEvent<Method,String> t)->{
                         
-                        Method tempMethod = (Method) t.getTableView().getItems()
-                                .get(t.getTablePosition().getRow());
-
-                        //if argument column
-                        if(tempMethod.getArguments().size()<size-4){
-                            
-                            int j;
-                            for(j=tempMethod.getArguments().size();
-                                    j<size-4;j++){
-                                tempMethod.addArgument(" ");
-                            }
-                        }
+                        
+                        Method tempMethod = t.getRowValue();
                         
                         int methodPosition=(t.getTablePosition().getRow()); 
                         
-                        tempMethod.setArgType(size-5,t.getNewValue());
+                        tempMethod.setArgType(t.getTablePosition().getColumn(),
+                                t.getNewValue());
                         
                         String m =tempMethod.toString();
                         Label l = new Label(m);
