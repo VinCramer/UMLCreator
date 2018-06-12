@@ -313,20 +313,18 @@ public class Workspace extends AppWorkspaceComponent{
         });
         
         zoomInButton.setOnAction(e->{
-            if(scale.getX()<2){
+            if(scale.getX()<1.5){
                 scale.setX(scale.getX()*1.1);
                 scale.setY(scale.getY()*1.1);
-                
-                //TODO - change scale of everything in view!
+                updateZoom();
             }
         });
         
         zoomOutButton.setOnAction(e->{
-            if(scale.getX()>0.5){
-                scale.setX(scale.getX()*(1/1.10));
-                scale.setY(scale.getY()*(1/1.10));
-                
-                //TODO - change scale of everything in view!
+            if(scale.getX()>0.75){
+                scale.setX(scale.getX()*(1/1.1));
+                scale.setY(scale.getY()*(1/1.1));
+                updateZoom();
             }
         });
         
@@ -685,6 +683,55 @@ public class Workspace extends AppWorkspaceComponent{
         //call helper methods to set up their respective parts of the screen
         setUpEditingSection();
         setUpWorkArea();
+    }
+    
+    /**
+     * Updates the zoom of all user created portions of the workspace
+     */
+    private void updateZoom(){
+        for(StackPane sp:userMadePanes){
+            Draggable drag = (Draggable)sp.getChildren().get(0);
+            sp.setScaleX(scale.getX());
+            sp.setScaleY(scale.getY());
+            if(drag instanceof DraggableClass){
+                DraggableClass dc = (DraggableClass)drag;
+                if(dc.hasAPIPane()){
+                    dc.getAPIPane().setScaleX(scale.getX());
+                    dc.getAPIPane().setScaleY(scale.getY());
+                    dc.getAPILine().setScaleX(scale.getX());
+                    dc.getAPILine().setScaleY(scale.getY());
+                }
+                if(dc.hasParent()){
+                    Line l = dc.getParentLine();
+                    l.setStartX(sp.getLayoutX()+sp.getWidth()/2.0);
+                    l.setStartY(sp.getLayoutY());
+                }
+                if(dc.hasInterface()){
+                    for(Line l:dc.getImplementLines()){
+                        l.setScaleX(scale.getX());
+                        l.setScaleY(scale.getY());
+                    }
+                }
+            }
+            else{
+                DraggableInterface di = (DraggableInterface)drag;
+                        
+                if(di.hasAPIPane()){
+                    di.getAPIPane().setScaleX(scale.getX());
+                    di.getAPIPane().setScaleY(scale.getY());
+                    di.getAPILine().setScaleX(scale.getX());
+                    di.getAPILine().setScaleY(scale.getY());
+                }
+                        
+                if(di.hasParent()){
+                    for(Line l:di.getParentLines()){
+                        l.setStartX(sp.getLayoutX()+sp.getWidth()/2.0);
+                        l.setStartY(sp.getLayoutY());
+                        
+                    }
+                }
+            }
+        }
     }
     
     
