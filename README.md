@@ -19,10 +19,11 @@ This repository is a remastering of my older version of the project to bring the
 - Exporting UML diagram to compiling Java code
 - Saving to a JSON file
 - Loading from a JSON file
+- Zooming in and out
 
 # Program functions to include:
 - Resizing classes and interfaces
-- Zooming in and out
+
 
 
 
