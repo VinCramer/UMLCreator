@@ -24,6 +24,9 @@ This repository is a remastering of my older version of the project to bring the
 # Program functions to include:
 - Resizing classes and interfaces
 
+# Program functions to consider adding:
+- Undo and redo. These may be added if I can find a good exteranl library to handle the functionality.
+
 
 
 
